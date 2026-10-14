@@ -88,6 +88,24 @@ main{padding:18px;min-width:0}.hidden{display:none!important}.grid{display:grid;
 @media(max-width:900px){.cloud-user .email{display:none}.cloud-user button{font-size:10px;padding:5px 7px}}
 
 
+
+/* === DASHBOARD COMPATTA MOBILE === */
+.mobile-dashboard{display:none}
+@media(max-width:900px){
+  .mobile-dashboard{display:block!important;margin:0 0 10px}
+  .mobile-dashboard .md-title{font-weight:900;color:#092c5c;font-size:14px;margin:0 0 7px}
+  .mobile-dashboard .md-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+  .mobile-dashboard .md-kpi{background:#fff;border:1px solid #cfd9e5;border-radius:10px;padding:8px 6px;text-align:center}
+  .mobile-dashboard .md-kpi b{display:block;font-size:18px;color:#092c5c;line-height:1.05}
+  .mobile-dashboard .md-kpi span{display:block;font-size:9px;color:#607086;font-weight:800;margin-top:3px}
+  .mobile-dashboard .md-progress{margin-top:7px;background:#fff;border:1px solid #cfd9e5;border-radius:10px;padding:8px}
+  .mobile-dashboard .md-row{display:grid;grid-template-columns:78px 1fr 36px;gap:6px;align-items:center;font-size:9px;margin:5px 0}
+  .mobile-dashboard .md-row strong{font-size:9px;color:#29415d;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .mobile-dashboard .md-bar{height:7px;background:#e7edf4;border-radius:999px;overflow:hidden}
+  .mobile-dashboard .md-bar i{display:block;height:100%;background:#2e6fa8;border-radius:999px}
+  .mobile-dashboard .md-prio{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px;font-size:10px;align-items:center}
+}
+
 /* === MODALITÀ MOBILE CAMPO: SOLO INSERIMENTO MANUTENZIONE === */
 .mobile-field-intro{display:none}
 .mobile-maint-cta{display:none}
@@ -277,6 +295,7 @@ body.role-admin #topAdminBtn{display:inline-flex!important}
 </section>
 
 <section id="plants" class="hidden">
+<div id="mobileDashboard" class="mobile-dashboard"></div>
 <div class="mobile-field-intro"><b>Manutenzione sul campo</b>Cerca il sezionatore, apri la scheda e registra gli esiti. I dati vengono salvati nell’archivio centrale quando sei online.</div>
 <div class="toolbar">
 <input id="q" type="search" placeholder="Cerca sede tecnica, località, tratta, nucleo...">
@@ -934,8 +953,22 @@ function displayActuation(x){const d=state(x);return d.azionamento||inferActuati
 function calcObj(x){let d=state(x),vals=effectiveChecks(d),kos=CHECKS.filter((k,i)=>vals[i]==="KO"),an=kos.length+(String(d.anom||"").trim()?1:0),idx=kos.reduce((sum,k)=>sum+(WEIGHTS[k]||0),0)+(String(d.anom||"").trim()?2:0),forcedA=kos.some(k=>FORCE_A.has(k));return {an,idx,fas:forcedA||idx>=8?"ROSSO":idx>=4?"ARANCIONE":idx>=1?"GIALLO":"VERDE",pri:forcedA||idx>=8?"A":idx>=4?"B":idx>=1?"C":"D",done:d.draft?"BOZZA":(d.saved?"SI":"NO")}}
 function show(v){if(isMobileMaintenanceMode())v="plants";["dash","plants","pp","critical"].forEach(id=>$(id).classList.toggle("hidden",id!==v));document.querySelectorAll(".navbtn[data-v]").forEach(b=>b.classList.toggle("active",b.dataset.v===v));document.querySelectorAll("[data-mobile-v]").forEach(b=>b.classList.toggle("active",b.dataset.mobileV===v));if(v==="dash")renderDash();if(v==="plants")renderList();if(v==="pp")renderPP();if(v==="critical")renderCritical();window.scrollTo({top:0,behavior:"auto"});}
 document.querySelectorAll(".navbtn[data-v]").forEach(b=>b.onclick=()=>show(b.dataset.v));
-function renderDash(){let t=MASTER.length,d=MASTER.filter(x=>state(x).saved).length,a=MASTER.filter(x=>calcObj(x).pri==="A").length;let kmMiss=MASTER.filter(x=>kmMissing(x.kmI)||kmMissing(x.kmF)).length;let dc={SCADUTO:0,"30":0,"60":0,OK:0,ND:0};MASTER.forEach(x=>dc[maintenanceInfo(x).status]++);$("kpis").innerHTML=[["Totale sezionatori",t],["Verificati",d],["Da verificare",t-d],["Scaduti",dc.SCADUTO],["Entro 30 gg",dc["30"]],["Km da completare",kmMiss]].map((x,i)=>`<div class="card kpi" ${i===3?'onclick="setDueFilter(\'SCADUTO\')" style="cursor:pointer"':i===4?'onclick="setDueFilter(\'30\')" style="cursor:pointer"':''}><div class="label">${x[0]}</div><div class="value">${x[1]}</div></div>`).join("");let nuclei=config.nuclei||[];$("bars").innerHTML=nuclei.map(n=>{let ss=MASTER.filter(x=>norm(x.nucleo)===norm(n)),dd=ss.filter(x=>state(x).saved).length,p=ss.length?Math.round(dd/ss.length*100):0;return `<div class="barrow"><b>${n}</b><div class="bar"><span style="width:${p}%"></span></div><b>${p}%</b></div>`}).join("");let co={A:0,B:0,C:0,D:0};MASTER.forEach(x=>co[calcObj(x).pri]++);$("prio").innerHTML=Object.entries(co).map(([k,v])=>`<p>${tag(k)} <b style="margin-left:8px">${v}</b></p>`).join("");$("alerts").innerHTML=MASTER.filter(x=>["A","B"].includes(calcObj(x).pri)).slice(0,8).map(x=>`<p>${tag(calcObj(x).pri)} <b>${esc(x.id)}</b> — ${esc(x.localita)} <span class="muted">${esc(x.nucleo)}</span></p>`).join("")||'<p class="muted">Nessuna criticità A/B.</p>';$("dueSummary").innerHTML=`<p onclick="setDueFilter('SCADUTO')" style="cursor:pointer">${dueBadge({status:'SCADUTO'})} <b>${dc.SCADUTO}</b></p><p onclick="setDueFilter('30')" style="cursor:pointer">${dueBadge({status:'30'})} <b>${dc['30']}</b></p><p onclick="setDueFilter('60')" style="cursor:pointer">${dueBadge({status:'60'})} <b>${dc['60']}</b></p><p onclick="setDueFilter('ND')" style="cursor:pointer">${dueBadge({status:'ND'})} <b>${dc.ND}</b></p>`;}
+function renderMobileDashboard(){
+  const e=$("mobileDashboard"); if(!e)return;
+  const t=MASTER.length;
+  const done=MASTER.filter(x=>state(x).saved).length;
+  const todo=t-done;
+  const pct=t?Math.round(done/t*100):0;
+  const a=MASTER.filter(x=>calcObj(x).pri==="A").length;
+  const b=MASTER.filter(x=>calcObj(x).pri==="B").length;
+  let dc={SCADUTO:0,"30":0,"60":0,OK:0,ND:0}; MASTER.forEach(x=>dc[maintenanceInfo(x).status]++);
+  const nuclei=[...new Set([...(config.nuclei||[]),...MASTER.map(x=>x.nucleo).filter(Boolean)])];
+  const progress=nuclei.map(n=>{const rr=MASTER.filter(x=>norm(x.nucleo)===norm(n));const d=rr.filter(x=>state(x).saved).length;const p=rr.length?Math.round(d/rr.length*100):0;return "<div class=\"md-row\"><strong>"+esc(n)+"</strong><div class=\"md-bar\"><i style=\"width:"+p+"%\"></i></div><b>"+p+"%</b></div>";}).join("");
+  e.innerHTML="<div class=\"md-title\">Riepilogo Sezionatori</div><div class=\"md-kpis\"><div class=\"md-kpi\"><b>"+t+"</b><span>TOTALI</span></div><div class=\"md-kpi\"><b>"+done+"</b><span>VERIFICATI</span></div><div class=\"md-kpi\"><b>"+todo+"</b><span>DA VERIFICARE</span></div><div class=\"md-kpi\"><b>"+pct+"%</b><span>AVANZAMENTO</span></div><div class=\"md-kpi\"><b>"+dc.SCADUTO+"</b><span>SCADUTI</span></div><div class=\"md-kpi\"><b>"+dc["30"]+"</b><span>ENTRO 30 GG</span></div></div><div class=\"md-progress\"><b style=\"font-size:10px;color:#29415d\">Avanzamento per nucleo</b>"+progress+"<div class=\"md-prio\">"+tag("A")+" <b>"+a+"</b> "+tag("B")+" <b>"+b+"</b></div></div>";
+}
+function renderDash(){renderMobileDashboard();let t=MASTER.length,d=MASTER.filter(x=>state(x).saved).length,a=MASTER.filter(x=>calcObj(x).pri==="A").length;let kmMiss=MASTER.filter(x=>kmMissing(x.kmI)||kmMissing(x.kmF)).length;let dc={SCADUTO:0,"30":0,"60":0,OK:0,ND:0};MASTER.forEach(x=>dc[maintenanceInfo(x).status]++);$("kpis").innerHTML=[["Totale sezionatori",t],["Verificati",d],["Da verificare",t-d],["Scaduti",dc.SCADUTO],["Entro 30 gg",dc["30"]],["Km da completare",kmMiss]].map((x,i)=>`<div class="card kpi" ${i===3?'onclick="setDueFilter(\'SCADUTO\')" style="cursor:pointer"':i===4?'onclick="setDueFilter(\'30\')" style="cursor:pointer"':''}><div class="label">${x[0]}</div><div class="value">${x[1]}</div></div>`).join("");let nuclei=config.nuclei||[];$("bars").innerHTML=nuclei.map(n=>{let ss=MASTER.filter(x=>norm(x.nucleo)===norm(n)),dd=ss.filter(x=>state(x).saved).length,p=ss.length?Math.round(dd/ss.length*100):0;return `<div class="barrow"><b>${n}</b><div class="bar"><span style="width:${p}%"></span></div><b>${p}%</b></div>`}).join("");let co={A:0,B:0,C:0,D:0};MASTER.forEach(x=>co[calcObj(x).pri]++);$("prio").innerHTML=Object.entries(co).map(([k,v])=>`<p>${tag(k)} <b style="margin-left:8px">${v}</b></p>`).join("");$("alerts").innerHTML=MASTER.filter(x=>["A","B"].includes(calcObj(x).pri)).slice(0,8).map(x=>`<p>${tag(calcObj(x).pri)} <b>${esc(x.id)}</b> — ${esc(x.localita)} <span class="muted">${esc(x.nucleo)}</span></p>`).join("")||'<p class="muted">Nessuna criticità A/B.</p>';$("dueSummary").innerHTML=`<p onclick="setDueFilter('SCADUTO')" style="cursor:pointer">${dueBadge({status:'SCADUTO'})} <b>${dc.SCADUTO}</b></p><p onclick="setDueFilter('30')" style="cursor:pointer">${dueBadge({status:'30'})} <b>${dc['30']}</b></p><p onclick="setDueFilter('60')" style="cursor:pointer">${dueBadge({status:'60'})} <b>${dc['60']}</b></p><p onclick="setDueFilter('ND')" style="cursor:pointer">${dueBadge({status:'ND'})} <b>${dc.ND}</b></p>`;}
 function renderList(){
+ renderMobileDashboard();
  let qq=$("q").value||"",nn=norm($("nf").value),pp=norm($("pf").value),cc=norm($("cf").value),kk=norm($("kmf").value),du=$("duf")?.value||"";
  let f=MASTER.filter(x=>{
    let c=calcObj(x),m=maintenanceInfo(x),missing=kmMissing(x.kmI)||kmMissing(x.kmF);
