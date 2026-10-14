@@ -542,10 +542,10 @@ function docsForPlant(x){
 }
 function renderDocsFiltered(codes,activeCode){
  const list=$("docsList");const docs=TE_DOCS.filter(d=>!codes||codes.includes(d.code));
- list.innerHTML=docs.map(d=>`<div class="doc-card ${activeCode===d.code?'active':''}" onclick="viewDoc(${TE_DOCS.indexOf(d)},this)"><span class="doc-badge">${d.group}</span><b>${d.code}</b><small>${d.title}</small><button class="doc-open-btn" type="button" onclick="event.stopPropagation();openPrivateDoc(d.file)">APRI PDF</button></div>`).join("")||'<div class="admin-note">Nessun riferimento individuato.</div>';
+ list.innerHTML=docs.map(d=>`<div class="doc-card ${activeCode===d.code?'active':''}" onclick="viewDoc(${TE_DOCS.indexOf(d)},this)"><span class="doc-badge">${d.group}</span><b>${d.code}</b><small>${d.title}</small><button class="doc-open-btn" type="button" onclick="event.stopPropagation();openPrivateDoc(TE_DOCS[${TE_DOCS.indexOf(d)}].file)">APRI PDF</button></div>`).join("")||'<div class="admin-note">Nessun riferimento individuato.</div>';
  if(docs.length){const d=docs.find(x=>x.code===activeCode)||docs[0];viewDoc(TE_DOCS.indexOf(d),list.querySelector('.doc-card'));}
 }
-function openDocs(code){const ov=$("docsOverlay");if(!ov)return;ov.classList.remove("hidden");const dl=$("docPlantOptions");if(dl)dl.innerHTML=MASTER.filter(x=>norm(x.stato)!=="DISATTIVATO").map(x=>`<option value="${esc(x.id)}">${esc(x.localita||"")} - ${esc(x.definition||"")}</option>`).join("");renderDocsFiltered(null,code);}
+function openDocs(code){const ov=$("docsOverlay");if(!ov)return;ov.classList.remove("hidden");const dl=$("docPlantOptions");if(dl)dl.innerHTML=MASTER.filter(x=>norm(x.stato)!=="DISATTIVATO").map(x=>`<option value="${esc(x.id)}">${esc(x.localita||"")} - ${esc(x.definition||"")}</option>`).join("");const info=$("docPlantInfo");if(info)info.innerHTML=`<b>${TE_DOCS.length} documenti disponibili</b><br>Se non selezioni un impianto vengono mostrati tutti i riferimenti TE.`;renderDocsFiltered(null,code);}
 function filterDocsByPlant(){const q=norm($("docPlantSearch")?.value||"");if(!q){$("docPlantInfo").textContent="Se non selezioni un impianto vengono mostrati tutti i documenti TE.";renderDocsFiltered(null);return;}const x=MASTER.find(x=>norm(x.id)===q)||MASTER.find(x=>norm([x.id,x.localita,x.definition].join(" ")).includes(q));if(!x){$("docPlantInfo").textContent="Seleziona un sezionatore dall’elenco per filtrare i riferimenti.";return;}const codes=docsForPlant(x);$("docPlantInfo").innerHTML=`<b>${esc(x.id)}</b> — ${esc(x.localita||x.definition||"")}<br>Riferimenti previsti: ${codes.map(esc).join(" · ")}`;renderDocsFiltered(codes);}
 function closeDocs(){$("docsOverlay")?.classList.add("hidden");const f=$("docFrame");if(f)f.src="about:blank";}
 async function viewDoc(i,el){document.querySelectorAll(".doc-card").forEach(x=>x.classList.remove("active"));if(el)el.classList.add("active");const d=TE_DOCS[i];try{$("docFrame").src=(await privateDocUrl(d.file))+"#view=FitH";}catch(e){$("docFrame").src="about:blank";appToast("Documento non disponibile: "+(e.message||e),"err",5200);}}
@@ -561,7 +561,10 @@ async function privateDocUrl(file){
   const d=await r.json();
   const u=d.signedURL||d.signedUrl||d.url;
   if(!u)throw new Error("Impossibile generare il collegamento al documento.");
-  return /^https?:\/\//i.test(u)?u:cloudBase()+u;
+  if(/^https?:\/\//i.test(u))return u;
+  if(u.startsWith("/storage/v1/"))return cloudBase()+u;
+  if(u.startsWith("/object/"))return cloudBase()+"/storage/v1"+u;
+  return cloudBase()+"/storage/v1/"+u.replace(/^\/+/,"");
 }
 async function openPrivateDoc(file){
   try{
