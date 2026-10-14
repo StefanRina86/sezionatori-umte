@@ -200,7 +200,7 @@ main{padding:18px;min-width:0}.hidden{display:none!important}.grid{display:grid;
 <div class="fileline" style="margin-top:10px"><button class="admin-btn" onclick="newPersonRow()">+ NUOVA PERSONA</button><input id="personImportFile" type="file" accept=".xlsx,.xls,.csv"><button class="admin-btn" onclick="importPersonnel()">IMPORTA PERSONALE</button><button class="btn secondary" onclick="downloadPersonnelTemplate()">SCARICA MODELLO CSV</button><input id="personSearch" placeholder="Cerca nome, CID, nucleo..." oninput="renderPersonnel()" style="max-width:300px"></div>
 <div style="overflow:auto;max-height:330px;margin-top:8px"><table class="admin-table"><thead><tr><th>Cognome</th><th>Nome</th><th>CID</th><th>Telefono</th><th>Nucleo</th><th>PES</th><th>Preposto emergenze</th><th>Attivo</th><th>Azioni</th></tr></thead><tbody id="personRows"></tbody></table></div>
 <h3>Template Programma per Prove</h3>
-<div class="admin-note">Installa il modello PP <b>normalizzato/non protetto</b>. È lo stesso modulo ufficiale, ma reso compatibile con la compilazione automatica. Il file viene salvato nella cartella <b>DOCUMENTI</b> dell’Archivio Sezionatori.</div>
+<div class="admin-note">Installa il modello PP <b>normalizzato/non protetto</b>. È lo stesso modulo ufficiale, ma reso compatibile con la compilazione automatica. Il file viene salvato nell’<b>archivio centrale protetto</b> e sarà disponibile da tutti i PC autorizzati.</div>
 <div class="fileline" style="margin-top:10px"><input id="ppTemplateFile" type="file" accept="application/pdf,.pdf"><button class="admin-btn" onclick="installPPTemplate()">INSTALLA / AGGIORNA TEMPLATE PP</button><span id="ppTemplateStatus" class="muted">Stato non verificato</span></div>
 <h3>Registro e numerazione PP</h3>
 <div class="admin-note">I PP prodotti non vengono archiviati come file PDF. L’app conserva invece nel registro condiviso tutti i dati utilizzati per generarli, così ogni PP può essere rigenerato in qualsiasi momento. Il numero è assegnato automaticamente in progressione per la UM.</div>
@@ -544,7 +544,9 @@ async function cloudFirstAccess(){
     }
   }catch(e){
     const msg=String(e.message||e);
-    if(/already|registered|exists/i.test(msg))showCloudLogin("Account già creato: usa ACCEDI con mail RFI e password.",true);
+    const wait=msg.match(/after\s+(\d+)\s+seconds?/i);
+    if(wait)showCloudLogin(`Richiesta già effettuata. Attendi ${wait[1]} secondi prima di riprovare. Controlla anche la mail RFI: la conferma potrebbe essere già stata inviata.`,false);
+    else if(/already|registered|exists/i.test(msg))showCloudLogin("Account già creato: usa ACCEDI con mail RFI e password.",true);
     else showCloudLogin(msg,true);
   }
 }
@@ -1065,17 +1067,56 @@ async function importPersonnel(){
   let add=0,upd=0;for(const p of imp){const j=p.cid?personnel.findIndex(x=>norm(x.cid)===norm(p.cid)):-1;if(j>=0){personnel[j]={...personnel[j],...p,id:personnel[j].id};upd++;}else{personnel.push(p);add++;}if(p.nucleo&&!config.nuclei.some(n=>norm(n)===norm(p.nucleo)))config.nuclei.push(p.nucleo);}
   await persistAll();renderNuclei();renderPersonnel();$("personImportFile").value="";alert(`Importazione personale completata: ${add} nuovi, ${upd} aggiornati.`);
 }
-async function getDocsDir(create=false){if(!archiveDirHandle)throw new Error("Archivio non collegato");return await archiveDirHandle.getDirectoryHandle("DOCUMENTI",{create});}
+const PP_TEMPLATE_FILE="Modulo PP -.pdf";
 async function installPPTemplate(){
-  if(!adminAuthenticated){alert("Accedi all'Amministrazione.");return;}const f=$("ppTemplateFile")?.files?.[0];if(!f){alert("Seleziona il PDF Modulo PP normalizzato.");return;}if(!/\.pdf$/i.test(f.name)){alert("Seleziona un file PDF.");return;}
+  if(currentUserRole!=="admin"||!adminAuthenticated){
+    alert("Accesso riservato agli amministratori.");
+    return;
+  }
+  const f=$("ppTemplateFile")?.files?.[0];
+  if(!f){alert("Seleziona il PDF Modulo PP normalizzato.");return;}
+  if(!/\.pdf$/i.test(f.name)){alert("Seleziona un file PDF.");return;}
   try{
     const ab=await f.arrayBuffer();
-    if(typeof PDFLib!=="undefined"){try{await PDFLib.PDFDocument.load(ab);}catch(e){if(String(e?.message||e).toLowerCase().includes("encrypt")){alert("Questo PDF è ancora protetto/cifrato. Installa il file Modulo_PP_NORMALIZZATO.pdf fornito con l'app.");return;}throw e;}}
-    const dir=await getDocsDir(true),fh=await dir.getFileHandle("Modulo PP -.pdf",{create:true}),w=await fh.createWritable();await w.write(ab);await w.close();$("ppTemplateFile").value="";await checkPPTemplate();alert("Template PP compatibile installato nell'archivio condiviso.");
-  }catch(e){alert("Installazione template non riuscita: "+(e?.message||e));}
+    if(typeof PDFLib!=="undefined"){
+      try{await PDFLib.PDFDocument.load(ab);}
+      catch(e){
+        if(String(e?.message||e).toLowerCase().includes("encrypt")){
+          alert("Questo PDF è ancora protetto/cifrato. Seleziona il modello PP normalizzato/non protetto.");
+          return;
+        }
+        throw e;
+      }
+    }
+    const safe=PP_TEMPLATE_FILE.split("/").map(encodeURIComponent).join("/");
+    await cloudFetch(`/storage/v1/object/umte-docs/${safe}`,{
+      method:"POST",
+      headers:{"Content-Type":"application/pdf","x-upsert":"true"},
+      body:f
+    });
+    $("ppTemplateFile").value="";
+    await checkPPTemplate();
+    alert("Template PP installato nell'archivio centrale.");
+  }catch(e){
+    alert("Installazione template non riuscita: "+(e?.message||e));
+  }
 }
 async function setPPLastProgressive(){if(!adminAuthenticated)return;const n=Math.max(0,parseInt($("ppLastProgressiveAdmin").value||"0",10)||0);if(!confirm(`Impostare ${n} come ultimo progressivo PP già utilizzato per questa UM? Il prossimo proposto sarà ${n+1}.`))return;ppLastProgressive=n;await persistAll();renderPP();alert("Progressivo PP aggiornato.");}
-async function checkPPTemplate(){const el=$("ppTemplateStatus");if(!el)return;try{const dir=await getDocsDir(false),fh=await dir.getFileHandle("Modulo PP -.pdf"),f=await fh.getFile();el.textContent=`PRESENTE - ${Math.round(f.size/1024)} KB`;el.style.color="#0b6c2a";}catch(e){el.textContent="MANCANTE NELL'ARCHIVIO";el.style.color="#a20008";}}
+async function checkPPTemplate(){
+  const el=$("ppTemplateStatus");
+  if(!el)return;
+  try{
+    const u=await privateDocUrl(PP_TEMPLATE_FILE);
+    const r=await fetch(u,{method:"HEAD"});
+    if(!r.ok)throw new Error("Template non disponibile");
+    const len=Number(r.headers.get("content-length")||0);
+    el.textContent=len?`PRESENTE - ${Math.round(len/1024)} KB`:"PRESENTE NELL'ARCHIVIO CENTRALE";
+    el.style.color="#0b6c2a";
+  }catch(e){
+    el.textContent="MANCANTE NELL'ARCHIVIO CENTRALE";
+    el.style.color="#a20008";
+  }
+}
 let ppSelected=new Set();
 let ppRISelected={};
 function activePPPeople(){return personnel.filter(p=>p.attivo!==false&&p.abilitatoPP!==false).sort((a,b)=>(a.cognome+" "+a.nome).localeCompare(b.cognome+" "+b.nome));}
@@ -1110,7 +1151,12 @@ function autofillPPTexts(){
   $("ppProtection").value="Adozione delle misure di protezione previste dal Piano di Lavoro, dalla procedura RFI DTC P SL 03 1 e dai documenti operativi applicabili.";
 }
 function formatPPDate(v){if(!v)return {date:"",time:""};const d=new Date(v);return {date:String(d.getDate()).padStart(2,"0")+"/"+String(d.getMonth()+1).padStart(2,"0")+"/"+d.getFullYear(),time:String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0")};}
-async function loadPPTemplateBytes(){const dir=await getDocsDir(false),fh=await dir.getFileHandle("Modulo PP -.pdf"),f=await fh.getFile();return await f.arrayBuffer();}
+async function loadPPTemplateBytes(){
+  const u=await privateDocUrl(PP_TEMPLATE_FILE);
+  const r=await fetch(u);
+  if(!r.ok)throw new Error("Template PP non disponibile nell'archivio centrale.");
+  return await r.arrayBuffer();
+}
 function buildPPPayload(number){
   const plants=selectedPPPlants();
   const rp=personnel.find(p=>p.id===$("ppRP").value);
