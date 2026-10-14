@@ -220,6 +220,11 @@ body.role-admin #topAdminBtn{display:inline-flex!important}
 <div class="admin-note">I PP prodotti non vengono archiviati come file PDF. L’app conserva invece nel registro condiviso tutti i dati utilizzati per generarli, così ogni PP può essere rigenerato in qualsiasi momento. Il numero è assegnato automaticamente in progressione per la UM.</div>
 <div class="fileline" style="margin-top:10px"><label class="muted">Ultimo progressivo PP già utilizzato prima dell’avvio dell’app:</label><input id="ppLastProgressiveAdmin" type="number" min="0" step="1" style="max-width:140px"><button class="btn secondary" onclick="setPPLastProgressive()">ALLINEA NUMERAZIONE INIZIALE</button></div>
 <h3>Accesso amministrativo</h3><div class="admin-note">L’accesso all’Amministrazione è gestito dal ruolo Supabase dell’utente. Non esiste più una seconda password amministratore dell’app.</div>
+    <h3>Report stato sezionatori</h3>
+    <div class="admin-note">Genera un report Excel di sola consultazione con lo stato complessivo del censimento: avanzamento verifiche, scadenze, priorità, situazione per nucleo e dettaglio di tutti i sezionatori. Il report non modifica i dati ed è scaricabile solo dall’Amministrazione.</div>
+    <div class="fileline" style="margin-top:10px">
+      <button class="admin-btn" onclick="exportStatusReportExcel()">SCARICA REPORT STATO SEZIONATORI</button>
+    </div>
     <h3>Backup / ripristino dati</h3>
     <div class="admin-note">
       Il file Excel di backup contiene anagrafica, progressive chilometriche, identificazione del sezionatore, tutti i controlli, anomalie, interventi e note. Può essere usato per ripristinare automaticamente il censimento. Password e codice di recupero non vengono esportati.
@@ -398,6 +403,103 @@ function xlsEscape(v){
   if(v===null||v===undefined) return "";
   return String(v).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
 }
+function exportStatusReportExcel(){
+  if(!adminAuthenticated||currentUserRole!=="admin"){alert("Funzione riservata agli amministratori.");return;}
+  if(typeof XLSX==="undefined"){alert("Per creare il report Excel serve la libreria XLSX. Verifica la connessione internet e ricarica la pagina.");return;}
+
+  const now=new Date(), generatedAt=now.toLocaleString("it-IT");
+  const total=MASTER.length;
+  const verified=MASTER.filter(x=>state(x).saved).length;
+  const drafts=MASTER.filter(x=>state(x).draft&&!state(x).saved).length;
+  const toVerify=total-verified;
+  const kmMissingCount=MASTER.filter(x=>kmMissing(state(x).kmI??x.kmI)||kmMissing(state(x).kmF??x.kmF)).length;
+  const due={SCADUTO:0,"30":0,"60":0,OK:0,ND:0};
+  const pri={A:0,B:0,C:0,D:0};
+  MASTER.forEach(x=>{const mi=maintenanceInfo(x);due[mi.status]=(due[mi.status]||0)+1;const p=calcObj(x).pri;pri[p]=(pri[p]||0)+1;});
+
+  const riepilogo=[
+    ["REPORT STATO SEZIONATORI", config.umId||"UMTE"],
+    ["Generato il", generatedAt],
+    ["Totale sezionatori", total],
+    ["Verificati", verified],
+    ["Da verificare", toVerify],
+    ["Bozze aperte", drafts],
+    ["Avanzamento verifiche", total?Math.round(verified/total*100)+"%":"0%"],
+    ["Scaduti", due.SCADUTO],
+    ["In scadenza entro 30 gg", due["30"]],
+    ["In scadenza entro 60 gg", due["60"]],
+    ["Scadenza regolare", due.OK],
+    ["Scadenza da definire", due.ND],
+    ["Priorità A", pri.A],
+    ["Priorità B", pri.B],
+    ["Priorità C", pri.C],
+    ["Priorità D", pri.D],
+    ["Km da completare", kmMissingCount]
+  ];
+
+  const nuclei=[...new Set([...(config.nuclei||[]),...MASTER.map(x=>x.nucleo).filter(Boolean)])].sort((a,b)=>a.localeCompare(b,"it"));
+  const nucRows=nuclei.map(n=>{
+    const arr=MASTER.filter(x=>norm(x.nucleo)===norm(n));
+    const v=arr.filter(x=>state(x).saved).length;
+    const sc=arr.filter(x=>maintenanceInfo(x).status==="SCADUTO").length;
+    const a=arr.filter(x=>calcObj(x).pri==="A").length;
+    const b=arr.filter(x=>calcObj(x).pri==="B").length;
+    return {"NUCLEO":n,"TOTALE":arr.length,"VERIFICATI":v,"DA VERIFICARE":arr.length-v,"AVANZAMENTO %":arr.length?Math.round(v/arr.length*100):0,"SCADUTI":sc,"PRIORITA A":a,"PRIORITA B":b};
+  });
+
+  const detailRows=MASTER.map(x=>{
+    const d=state(x),mi=maintenanceInfo(x),c=calcObj(x);
+    const vals=effectiveChecks(d);
+    const ko=CHECKS.filter((k,i)=>vals[i]==="KO");
+    const verState=d.draft&&!d.saved?"BOZZA":d.saved?"VERIFICATO":"DA VERIFICARE";
+    const dueLabel=mi.status==="SCADUTO"?"SCADUTO":mi.status==="30"?"ENTRO 30 GG":mi.status==="60"?"ENTRO 60 GG":mi.status==="OK"?"REGOLARE":"DA DEFINIRE";
+    return {
+      "SEDE TECNICA":x.id||"",
+      "LOCALITA / TRATTA":x.localita||"",
+      "NUCLEO":x.nucleo||"",
+      "DEFINIZIONE":x.definition||"",
+      "KM INIZIO":!kmMissing(d.kmI)?d.kmI:(!kmMissing(x.kmI)?x.kmI:""),
+      "KM FINE":!kmMissing(d.kmF)?d.kmF:(!kmMissing(x.kmF)?x.kmF:""),
+      "STATO IMPIANTO":x.stato||"",
+      "STATO VERIFICA":verState,
+      "ULTIMA VERIFICA":fmtDate(mi.last),
+      "PROSSIMA SCADENZA":fmtDate(mi.next),
+      "STATO SCADENZA":dueLabel,
+      "PRIORITA":c.pri,
+      "INDICE":c.idx,
+      "NUMERO KO":ko.length,
+      "CONTROLLI KO":ko.join(" | "),
+      "ANOMALIA / DETTAGLIO":d.anom||"",
+      "INTERVENTO DA PROGRAMMARE":d.prev||"",
+      "INTERVENTO ESEGUITO / NOTE":d.note||"",
+      "ULTIMO AGGIORNAMENTO":fmtDate(d.updated||"")
+    };
+  });
+
+  const criticalRows=detailRows.filter(r=>r["PRIORITA"]==="A"||r["PRIORITA"]==="B"||r["STATO SCADENZA"]==="SCADUTO"||r["STATO SCADENZA"]==="ENTRO 30 GG");
+
+  const wb=XLSX.utils.book_new();
+  const wsR=XLSX.utils.aoa_to_sheet(riepilogo);
+  wsR["!cols"]=[{wch:32},{wch:28}];
+  XLSX.utils.book_append_sheet(wb,wsR,"RIEPILOGO");
+
+  const wsN=XLSX.utils.json_to_sheet(nucRows.length?nucRows:[{"NUCLEO":""}]);
+  wsN["!cols"]=[{wch:22},{wch:10},{wch:12},{wch:14},{wch:15},{wch:10},{wch:12},{wch:12}];
+  XLSX.utils.book_append_sheet(wb,wsN,"STATO_PER_NUCLEO");
+
+  const wsD=XLSX.utils.json_to_sheet(detailRows.length?detailRows:[{"SEDE TECNICA":""}]);
+  wsD["!cols"]=[{wch:20},{wch:28},{wch:18},{wch:28},{wch:12},{wch:12},{wch:16},{wch:16},{wch:16},{wch:18},{wch:18},{wch:10},{wch:8},{wch:10},{wch:45},{wch:45},{wch:45},{wch:45},{wch:20}];
+  XLSX.utils.book_append_sheet(wb,wsD,"DETTAGLIO");
+
+  const wsC=XLSX.utils.json_to_sheet(criticalRows.length?criticalRows:[{"SEDE TECNICA":"Nessuna criticità A/B o scadenza urgente"}]);
+  wsC["!cols"]=wsD["!cols"];
+  XLSX.utils.book_append_sheet(wb,wsC,"CRITICITA");
+
+  const um=(config.umId||"UMTE").replace(/[^\w\-]+/g,"_");
+  const stamp=now.getFullYear()+String(now.getMonth()+1).padStart(2,"0")+String(now.getDate()).padStart(2,"0")+"_"+String(now.getHours()).padStart(2,"0")+String(now.getMinutes()).padStart(2,"0");
+  XLSX.writeFile(wb,"Report_Stato_Sezionatori_"+um+"_"+stamp+".xlsx");
+}
+
 function exportExcelData(){
   if(!adminAuthenticated){alert("Accedi all'Amministrazione per esportare i dati.");return;}
   if(typeof XLSX==="undefined"){alert("Per creare il backup Excel serve la libreria XLSX. Verifica la connessione internet e ricarica la pagina.");return;}
