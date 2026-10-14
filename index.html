@@ -146,12 +146,18 @@ main{padding:18px;min-width:0}.hidden{display:none!important}.grid{display:grid;
   #plants .toolbar #q,#plants .toolbar #count{grid-column:1}
 }
 
+
+#mobileAdminBtn,#topAdminBtn{display:none}
 </style></head><body><div id="appToast" class="app-toast" role="status" aria-live="polite"></div><div id="cloudLogin" class="cloud-login hidden"><div class="cloud-box">
 <h2>Sezionatori UMTE</h2>
 <p>Accesso riservato agli utenti autorizzati. I dati vengono sincronizzati con l'archivio centrale.</p>
 <div id="cloudConfigWarning" class="cloud-msg err hidden">Configurazione cloud mancante. Compila <b>config.js</b> prima della pubblicazione.</div>
-<label>Email</label><input id="cloudEmail" type="email" autocomplete="username" placeholder="nome.cognome@..."><label>Password</label><input id="cloudPassword" type="password" autocomplete="current-password" placeholder="Password">
-<button onclick="cloudLogin()">ACCEDI</button><div id="cloudLoginMsg" class="cloud-msg">Inserisci le credenziali abilitate nel progetto.</div>
+<label>Email RFI</label><input id="cloudEmail" type="email" autocomplete="username" placeholder="nome.cognome@rfi.it"><label>Password</label><input id="cloudPassword" type="password" autocomplete="current-password" placeholder="Password">
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px">
+<button onclick="cloudLogin()">ACCEDI</button>
+<button type="button" style="background:#fff;color:#092c5c;border:1px solid #9fb2c9" onclick="cloudFirstAccess()">PRIMO ACCESSO</button>
+</div>
+<div id="cloudLoginMsg" class="cloud-msg">Primo accesso: inserisci la mail RFI e usa il tuo CID di 6 cifre come password, poi premi PRIMO ACCESSO.</div>
 </div></div>
 <div id="archiveGate" class="archive-gate">
   <div class="archive-box">
@@ -199,13 +205,7 @@ main{padding:18px;min-width:0}.hidden{display:none!important}.grid{display:grid;
 <h3>Registro e numerazione PP</h3>
 <div class="admin-note">I PP prodotti non vengono archiviati come file PDF. L’app conserva invece nel registro condiviso tutti i dati utilizzati per generarli, così ogni PP può essere rigenerato in qualsiasi momento. Il numero è assegnato automaticamente in progressione per la UM.</div>
 <div class="fileline" style="margin-top:10px"><label class="muted">Ultimo progressivo PP già utilizzato prima dell’avvio dell’app:</label><input id="ppLastProgressiveAdmin" type="number" min="0" step="1" style="max-width:140px"><button class="btn secondary" onclick="setPPLastProgressive()">ALLINEA NUMERAZIONE INIZIALE</button></div>
-<h3>Codice di recupero amministratore</h3>
-<div class="admin-note">Serve solo per reimpostare la password dimenticata. Conservalo separatamente e condividilo esclusivamente con chi è autorizzato all'amministrazione.</div>
-<div class="admin-row" style="margin-top:10px">
-<input id="recoveryCodeDisplay" type="text" readonly placeholder="Codice non ancora generato">
-<button class="admin-btn" onclick="generateRecoveryCode()">GENERA / RIGENERA</button>
-</div>
-<h3>Password amministratore</h3><div class="admin-grid"><input id="newPass" type="password" placeholder="Nuova password"><input id="newPass2" type="password" placeholder="Conferma nuova password"></div>
+<h3>Accesso amministrativo</h3><div class="admin-note">L’accesso all’Amministrazione è gestito dal ruolo Supabase dell’utente. Non esiste più una seconda password amministratore dell’app.</div>
     <h3>Backup / ripristino dati</h3>
     <div class="admin-note">
       Il file Excel di backup contiene anagrafica, progressive chilometriche, identificazione del sezionatore, tutti i controlli, anomalie, interventi e note. Può essere usato per ripristinare automaticamente il censimento. Password e codice di recupero non vengono esportati.
@@ -235,7 +235,7 @@ main{padding:18px;min-width:0}.hidden{display:none!important}.grid{display:grid;
     <button class="admin-btn danger" onclick="confirmFactoryReset()">ESEGUI RESET COMPLETO</button>
   </div>
 </div></div>
-<div id="docsOverlay" class="doc-overlay hidden"><div class="doc-panel"><div class="doc-head"><h2>Documenti / Normativa — Sezionatori TE</h2><button class="admin-btn" onclick="closeDocs()">CHIUDI</button></div><div class="doc-body"><div class="doc-list"><div class="admin-note">Sono mostrati esclusivamente documenti di competenza <b>TE</b>. I documenti SS presenti nel pacchetto sorgente sono esclusi.</div><div style="margin-top:10px"><label class="muted"><b>Sezionatore su cui devi lavorare</b></label><input id="docPlantSearch" list="docPlantOptions" placeholder="Cerca sede tecnica, località, tratta..." oninput="filterDocsByPlant()" style="width:100%;margin-top:5px;padding:9px;border:1px solid #b9c7d8;border-radius:8px"><datalist id="docPlantOptions"></datalist><div id="docPlantInfo" class="muted" style="margin-top:6px">Se non selezioni un impianto vengono mostrati tutti i documenti TE.</div></div><div id="docsList" style="margin-top:10px"></div><div class="refbox"><b>Riferimenti richiamati dalle MOL TE</b><br>RFI DTC P SL 03 1 e Guida Integrativa · IEITE · IPC · RCT · DPR 469/79 · D.Lgs. 81/2008 e s.m.i. · disposizioni/norme di esercizio specifiche d'impianto · schemi elettrici/piani schematici TE aggiornati · manuali d'uso e manutenzione del costruttore.<br><br><b>Nota:</b> questi riferimenti sono censiti perché richiamati dalle MOL; la visualizzazione diretta è disponibile quando il relativo PDF è presente nella cartella DOCUMENTI.</div></div><div class="doc-view"><iframe id="docFrame" title="Visualizzatore documenti"></iframe></div></div></div></div><header><div class="brand">Censimento Sezionatori UMTE<small>MANUTENZIONE TE</small></div><button class="mobile-admin" onclick="openAdminLogin()">ADMIN</button><div class="saved"><span id="archiveChip" class="archive-chip off">CONNESSIONE...</span><span class="cloud-user"><span id="cloudUserEmail" class="email"></span><button onclick="cloudLogout()">ESCI</button></span><button class="admin-btn top-admin" onclick="openAdminLogin()">AMMINISTRAZIONE</button></div></header>
+<div id="docsOverlay" class="doc-overlay hidden"><div class="doc-panel"><div class="doc-head"><h2>Documenti / Normativa — Sezionatori TE</h2><button class="admin-btn" onclick="closeDocs()">CHIUDI</button></div><div class="doc-body"><div class="doc-list"><div class="admin-note">Sono mostrati esclusivamente documenti di competenza <b>TE</b>. I documenti SS presenti nel pacchetto sorgente sono esclusi.</div><div style="margin-top:10px"><label class="muted"><b>Sezionatore su cui devi lavorare</b></label><input id="docPlantSearch" list="docPlantOptions" placeholder="Cerca sede tecnica, località, tratta..." oninput="filterDocsByPlant()" style="width:100%;margin-top:5px;padding:9px;border:1px solid #b9c7d8;border-radius:8px"><datalist id="docPlantOptions"></datalist><div id="docPlantInfo" class="muted" style="margin-top:6px">Se non selezioni un impianto vengono mostrati tutti i documenti TE.</div></div><div id="docsList" style="margin-top:10px"></div><div class="refbox"><b>Riferimenti richiamati dalle MOL TE</b><br>RFI DTC P SL 03 1 e Guida Integrativa · IEITE · IPC · RCT · DPR 469/79 · D.Lgs. 81/2008 e s.m.i. · disposizioni/norme di esercizio specifiche d'impianto · schemi elettrici/piani schematici TE aggiornati · manuali d'uso e manutenzione del costruttore.<br><br><b>Nota:</b> questi riferimenti sono censiti perché richiamati dalle MOL; la visualizzazione diretta è disponibile quando il relativo PDF è presente nella cartella DOCUMENTI.</div></div><div class="doc-view"><iframe id="docFrame" title="Visualizzatore documenti"></iframe></div></div></div></div><header><div class="brand">Censimento Sezionatori UMTE<small>MANUTENZIONE TE</small></div><button id="mobileAdminBtn" class="mobile-admin" onclick="openAdminLogin()">ADMIN</button><div class="saved"><span id="archiveChip" class="archive-chip off">CONNESSIONE...</span><span class="cloud-user"><span id="cloudUserEmail" class="email"></span><button onclick="cloudLogout()">ESCI</button></span><button id="topAdminBtn" class="admin-btn top-admin" onclick="openAdminLogin()">AMMINISTRAZIONE</button></div></header>
 <div class="layout">
 <aside class="menu">
 <button class="navbtn active" data-v="dash">Dashboard</button>
@@ -494,6 +494,7 @@ async function connectArchive(){return initCloudApp();}
 const CLOUD_DOCS_TABLE="umte_docs", CLOUD_PLANTS_TABLE="umte_plant_state";
 const CLOUD_SESSION_KEY="umteCloudSessionV1", CLOUD_OUTBOX_KEY="umteCloudOutboxV1";
 let cloudSession=null, cloudLoading=false;
+let currentUserRole="", currentUserProfile=null;
 function cloudCfg(){return window.UMTE_CLOUD_CONFIG||{};}
 function cloudConfigured(){const c=cloudCfg();return /^https:\/\//i.test(String(c.url||""))&&String(c.key||"").length>20;}
 function cloudBase(){return String(cloudCfg().url||"").replace(/\/$/,"");}
@@ -502,10 +503,55 @@ function saveCloudSession(s){cloudSession=s||null;if(s)localStorage.setItem(CLOU
 function loadCloudSession(){try{return JSON.parse(localStorage.getItem(CLOUD_SESSION_KEY)||"null")}catch(e){return null}}
 function showCloudLogin(msg="",err=false){const x=$("cloudLogin");if(x)x.classList.remove("hidden");const m=$("cloudLoginMsg");if(m&&msg){m.textContent=msg;m.classList.toggle("err",!!err);m.classList.toggle("ok",!err);}const w=$("cloudConfigWarning");if(w)w.classList.toggle("hidden",cloudConfigured());}
 function hideCloudLogin(){const x=$("cloudLogin");if(x)x.classList.add("hidden");}
-function updateCloudUser(){const u=cloudSession?.user;const el=$("cloudUserEmail");if(el)el.textContent=u?.email||"";}
+function updateCloudUser(){const u=cloudSession?.user;const el=$("cloudUserEmail");if(el)el.textContent=(currentUserProfile?.full_name?currentUserProfile.full_name+" · ":"")+(u?.email||"");updateRoleUI();}
+
+async function loadCurrentUserProfile(){
+  const uid=cloudSession?.user?.id;
+  if(!uid)throw new Error("LOGIN_REQUIRED");
+  const r=await cloudFetch(`/rest/v1/umte_profiles?select=user_id,role,email,full_name,nucleo&user_id=eq.${encodeURIComponent(uid)}`);
+  const arr=await r.json();
+  if(!Array.isArray(arr)||!arr.length)throw new Error("UTENTE_NON_AUTORIZZATO");
+  currentUserProfile=arr[0];
+  currentUserRole=currentUserProfile.role||"operator";
+  adminAuthenticated=currentUserRole==="admin";
+  updateRoleUI();
+  return currentUserProfile;
+}
+function updateRoleUI(){
+  const isAdmin=currentUserRole==="admin";
+  ["mobileAdminBtn","topAdminBtn"].forEach(id=>{
+    const el=$(id);
+    if(el)el.style.display=isAdmin?"":"none";
+  });
+}
+async function cloudFirstAccess(){
+  if(!cloudConfigured()){showCloudLogin("Configurazione cloud non disponibile.",true);return;}
+  const email=($("cloudEmail")?.value||"").trim().toLowerCase();
+  const cid=$("cloudPassword")?.value||"";
+  if(!/^[a-z0-9._%+\-]+@rfi\.it$/i.test(email)){showCloudLogin("Inserisci la tua mail RFI valida.",true);return;}
+  if(!/^\d{6}$/.test(cid)){showCloudLogin("Al primo accesso usa il tuo CID di 6 cifre come password.",true);return;}
+  try{
+    showCloudLogin("Registrazione in corso...");
+    const s=await authFetch("/auth/v1/signup",{email,password:cid});
+    if(s?.access_token){
+      s.expires_at=Math.floor(Date.now()/1000)+Number(s.expires_in||3600);
+      saveCloudSession(s);
+      updateCloudUser();
+      hideCloudLogin();
+      await loadCloudData(true);
+    }else{
+      showCloudLogin("Account creato. Controlla la mail RFI e conferma l’indirizzo, poi torna qui e premi ACCEDI.");
+    }
+  }catch(e){
+    const msg=String(e.message||e);
+    if(/already|registered|exists/i.test(msg))showCloudLogin("Account già creato: usa ACCEDI con mail RFI e password.",true);
+    else showCloudLogin(msg,true);
+  }
+}
+
 async function authFetch(path,body){const r=await fetch(cloudBase()+path,{method:"POST",headers:{"apikey":cloudCfg().key,"Content-Type":"application/json"},body:JSON.stringify(body)});let data={};try{data=await r.json()}catch(e){}if(!r.ok)throw new Error(data?.msg||data?.error_description||data?.error||"Autenticazione non riuscita");return data;}
 async function cloudLogin(){if(!cloudConfigured()){showCloudLogin("Configura prima URL e Publishable key in config.js.",true);return;}const email=$("cloudEmail")?.value.trim(),password=$("cloudPassword")?.value||"";if(!email||!password){showCloudLogin("Inserisci email e password.",true);return;}try{showCloudLogin("Accesso in corso...");const s=await authFetch("/auth/v1/token?grant_type=password",{email,password});s.expires_at=Math.floor(Date.now()/1000)+Number(s.expires_in||3600);saveCloudSession(s);updateCloudUser();hideCloudLogin();await loadCloudData(true);}catch(e){showCloudLogin(e.message||String(e),true)}}
-async function cloudLogout(){try{if(cloudSession?.access_token)await fetch(cloudBase()+"/auth/v1/logout",{method:"POST",headers:{apikey:cloudCfg().key,Authorization:"Bearer "+cloudSession.access_token}})}catch(e){}saveCloudSession(null);try{localStorage.removeItem("sezRegistry_TEST_PULITO");localStorage.removeItem("sezDB_TEST_PULITO");}catch(e){}MASTER=[];db={};updateCloudUser();showCloudLogin("Sessione chiusa.");setArchiveUI("boot","ACCESSO RICHIESTO");}
+async function cloudLogout(){try{if(cloudSession?.access_token)await fetch(cloudBase()+"/auth/v1/logout",{method:"POST",headers:{apikey:cloudCfg().key,Authorization:"Bearer "+cloudSession.access_token}})}catch(e){}saveCloudSession(null);try{localStorage.removeItem("sezRegistry_TEST_PULITO");localStorage.removeItem("sezDB_TEST_PULITO");}catch(e){}MASTER=[];db={};currentUserRole="";currentUserProfile=null;adminAuthenticated=false;updateCloudUser();showCloudLogin("Sessione chiusa.");setArchiveUI("boot","ACCESSO RICHIESTO");}
 async function ensureCloudSession(){if(!cloudSession)cloudSession=loadCloudSession();if(!cloudSession)throw new Error("LOGIN_REQUIRED");const now=Math.floor(Date.now()/1000);if(Number(cloudSession.expires_at||0)>now+90)return cloudSession;if(!cloudSession.refresh_token)throw new Error("LOGIN_REQUIRED");const s=await authFetch("/auth/v1/token?grant_type=refresh_token",{refresh_token:cloudSession.refresh_token});s.expires_at=Math.floor(Date.now()/1000)+Number(s.expires_in||3600);saveCloudSession(s);updateCloudUser();return s;}
 async function cloudFetch(path,opts={},retry=true){const s=await ensureCloudSession();const h={apikey:cloudCfg().key,Authorization:"Bearer "+s.access_token,...(opts.headers||{})};const r=await fetch(cloudBase()+path,{...opts,headers:h});if(r.status===401&&retry){cloudSession.expires_at=0;saveCloudSession(cloudSession);await ensureCloudSession();return cloudFetch(path,opts,false);}if(!r.ok){let t="";try{t=await r.text()}catch(e){}throw new Error(`Cloud ${r.status}: ${t||r.statusText}`)}return r;}
 function cloudQueue(op){let q=[];try{q=JSON.parse(localStorage.getItem(CLOUD_OUTBOX_KEY)||"[]")}catch(e){}const id=op.type+":"+(op.key||op.plant_id||"");q=q.filter(x=>(x.type+":"+(x.key||x.plant_id||""))!==id);q.push({...op,queuedAt:new Date().toISOString()});localStorage.setItem(CLOUD_OUTBOX_KEY,JSON.stringify(q));setArchiveUI("offline","DA SINCRONIZZARE");}
@@ -516,7 +562,9 @@ async function flushCloudOutbox(){let q=[];try{q=JSON.parse(localStorage.getItem
 function cacheAllLocal(){localStorage.setItem("sezDB_TEST_PULITO",JSON.stringify(db));localStorage.setItem("sezConfig_TEST_PULITO",JSON.stringify(config));localStorage.setItem("sezPersonnel_TEST_PULITO",JSON.stringify(personnel));localStorage.setItem("sezRegistry_TEST_PULITO",JSON.stringify(MASTER));localStorage.setItem("sezPPRegister_TEST_PULITO",JSON.stringify(ppRegister));localStorage.setItem("sezPPLastProgressive_TEST_PULITO",String(ppLastProgressive||0));}
 async function cloudSaveGlobals(){cacheAllLocal();const pp={register:ppRegister,lastProgressive:Number(ppLastProgressive||0)};const ok=await Promise.all([cloudUpsertDoc("registry","main",MASTER),cloudUpsertDoc("config","main",config),cloudUpsertDoc("personnel","main",personnel),cloudUpsertDoc("pp","main",pp)]);if(ok.every(Boolean))setArchiveUI("online");return ok.every(Boolean);}
 async function syncAllPlantStates(){const entries=Object.entries(db||{});for(let i=0;i<entries.length;i+=30){await Promise.all(entries.slice(i,i+30).map(([id,p])=>cloudUpsertPlant(id,p)));}return true;}
-async function loadCloudData(force=false){if(cloudLoading)return;cloudLoading=true;setArchiveUI("boot","SINCRONIZZAZIONE...");try{await ensureCloudSession();await flushCloudOutbox();const [dr,pr]=await Promise.all([cloudFetch(`/rest/v1/${CLOUD_DOCS_TABLE}?select=kind,key,payload`),cloudFetch(`/rest/v1/${CLOUD_PLANTS_TABLE}?select=plant_id,payload`)]);const docs=await dr.json(),plants=await pr.json(),dm={};docs.forEach(x=>dm[x.kind+":"+x.key]=x.payload);if(dm["registry:main"]&&Array.isArray(dm["registry:main"])&&dm["registry:main"].length)MASTER=dm["registry:main"];else throw new Error("ANAGRAFICA_NON_CONFIGURATA");if(dm["config:main"])config={...defaultConfig(),...dm["config:main"]};if(dm["personnel:main"]&&Array.isArray(dm["personnel:main"]))personnel=dm["personnel:main"];if(dm["pp:main"]){ppRegister=Array.isArray(dm["pp:main"].register)?dm["pp:main"].register:[];ppLastProgressive=Number(dm["pp:main"].lastProgressive||0);}if(plants.length){db={};plants.forEach(x=>db[x.plant_id]=x.payload||{});}cacheAllLocal();hideCloudLogin();updateCloudUser();setArchiveUI("online");refreshConfigUI();renderDash();renderList();renderCritical();renderPPRegister?.();if(isMobileMaintenanceMode())show("plants");if(!config.umId)$("setupGate")?.classList.remove("hidden");}catch(e){console.error(e);if(String(e.message)==="LOGIN_REQUIRED"){showCloudLogin("Accedi per caricare l'archivio centrale.");setArchiveUI("boot","ACCESSO RICHIESTO");}else{const hasCache=Array.isArray(MASTER)&&MASTER.length;if(hasCache){hideCloudLogin();setArchiveUI("error","ERRORE APP · DATI LOCALI");try{refreshConfigUI();renderDash();renderList();renderCritical();if(isMobileMaintenanceMode())show("plants");}catch(uiErr){console.error(uiErr);}appToast("Errore applicazione: "+(e.message||e),"err",6000);}else showCloudLogin(String(e.message)==="ANAGRAFICA_NON_CONFIGURATA"?"Anagrafica centrale non ancora caricata. Esegui SUPABASE_SETUP.sql.":"Archivio non raggiungibile: "+(e.message||e),true);}}finally{cloudLoading=false}}
+async function loadCloudData(force=false){if(cloudLoading)return;cloudLoading=true;setArchiveUI("boot","SINCRONIZZAZIONE...");try{await ensureCloudSession();await loadCurrentUserProfile();await flushCloudOutbox();const [dr,pr]=await Promise.all([cloudFetch(`/rest/v1/${CLOUD_DOCS_TABLE}?select=kind,key,payload`),cloudFetch(`/rest/v1/${CLOUD_PLANTS_TABLE}?select=plant_id,payload`)]);const docs=await dr.json(),plants=await pr.json(),dm={};docs.forEach(x=>dm[x.kind+":"+x.key]=x.payload);if(dm["registry:main"]&&Array.isArray(dm["registry:main"])&&dm["registry:main"].length)MASTER=dm["registry:main"];else throw new Error("ANAGRAFICA_NON_CONFIGURATA");if(dm["config:main"])config={...defaultConfig(),...dm["config:main"]};if(dm["personnel:main"]&&Array.isArray(dm["personnel:main"]))personnel=dm["personnel:main"];if(dm["pp:main"]){ppRegister=Array.isArray(dm["pp:main"].register)?dm["pp:main"].register:[];ppLastProgressive=Number(dm["pp:main"].lastProgressive||0);}if(plants.length){db={};plants.forEach(x=>db[x.plant_id]=x.payload||{});}cacheAllLocal();hideCloudLogin();updateCloudUser();setArchiveUI("online");refreshConfigUI();renderDash();renderList();renderCritical();renderPPRegister?.();if(isMobileMaintenanceMode())show("plants");if(!config.umId)$("setupGate")?.classList.remove("hidden");}catch(e){console.error(e);if(String(e.message)==="LOGIN_REQUIRED"){showCloudLogin("Accedi per caricare l'archivio centrale.");setArchiveUI("boot","ACCESSO RICHIESTO");}
+else if(String(e.message)==="UTENTE_NON_AUTORIZZATO"){saveCloudSession(null);currentUserRole="";currentUserProfile=null;adminAuthenticated=false;updateRoleUI();showCloudLogin("Utente non autorizzato per UMTE1 Gallarate.",true);setArchiveUI("boot","ACCESSO NEGATO");}
+else{const hasCache=Array.isArray(MASTER)&&MASTER.length;if(hasCache){hideCloudLogin();setArchiveUI("error","ERRORE APP · DATI LOCALI");try{refreshConfigUI();renderDash();renderList();renderCritical();if(isMobileMaintenanceMode())show("plants");}catch(uiErr){console.error(uiErr);}appToast("Errore applicazione: "+(e.message||e),"err",6000);}else showCloudLogin(String(e.message)==="ANAGRAFICA_NON_CONFIGURATA"?"Anagrafica centrale non ancora caricata. Esegui SUPABASE_SETUP.sql.":"Archivio non raggiungibile: "+(e.message||e),true);}}finally{cloudLoading=false}}
 async function initCloudApp(){if(!cloudConfigured()){showCloudLogin("Configura URL e Publishable key in config.js prima di pubblicare.",true);setArchiveUI("error","CONFIGURAZIONE MANCANTE");return;}cloudSession=loadCloudSession();updateCloudUser();if(!cloudSession){showCloudLogin();setArchiveUI("boot","ACCESSO RICHIESTO");return;}await loadCloudData();}
 async function loadSharedData(){return loadCloudData();}
 async function writeSharedData(){cacheAllLocal();if(!cloudSession)return true;if(current?.id&&db[current.id]){const ok=await cloudUpsertPlant(current.id,db[current.id]);if(ok)setArchiveUI("online");return ok;}return cloudSaveGlobals();}
@@ -885,15 +933,15 @@ function defaultConfig(){return {umId:"",description:"",nuclei:[],passwordHash:"
 async function hashText(t){const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(t));return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,"0")).join("")}
 function refreshConfigUI(){document.title=config.umId?`Censimento Sezionatori - ${config.umId}`:"Censimento Sezionatori UMTE";document.querySelector(".brand").innerHTML=(config.umId?`Censimento Sezionatori - ${esc(config.umId)}`:"Censimento Sezionatori UMTE")+"<small>SEZIONATORI TE</small>";let nf=$("nf"),v=nf.value;let nuclei=[...new Set([...(config.nuclei||[]),...MASTER.map(x=>x.nucleo).filter(Boolean)])].sort((a,b)=>a.localeCompare(b,"it"));nf.innerHTML='<option value="">Tutti i nuclei</option>'+nuclei.map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join("");nf.value=v;renderDash();renderList()}
 async function completeSetup(){let um=$("setupUM").value.trim(),nu=$("setupNucleo").value.trim(),p=$("setupPass").value,p2=$("setupPass2").value;if(!um||!nu){$("setupMsg").textContent="Inserisci identificativo UM e almeno un nucleo.";return}if(p.length<6){$("setupMsg").textContent="La password deve avere almeno 6 caratteri.";return}if(p!==p2){$("setupMsg").textContent="Le password non coincidono.";return}const recoveryCode=makeRecoveryCode();config={...defaultConfig(),umId:um,nuclei:[nu],passwordHash:await hashText(p),recoveryCodeHash:await hashText(recoveryCode.toUpperCase())};await persistAll();$("setupGate").classList.add("hidden");refreshConfigUI();alert("CONFIGURAZIONE CREATA\n\nCodice di recupero amministratore: "+recoveryCode+"\n\nAnnotalo e conservalo separatamente. Non verrà mostrato nuovamente in chiaro.")}
-function openAdminLogin(){$("adminPass").value="";$("adminMsg").textContent="Inserisci la password configurata per questa UM.";$("adminLogin").classList.remove("hidden")}
+function openAdminLogin(){if(currentUserRole!=="admin"){appToast("Accesso riservato agli amministratori.","err",4200);return;}adminAuthenticated=true;openAdminPanel()}
 function closeAdminLogin(){$("adminLogin").classList.add("hidden")}
-async function adminLogin(){if(await hashText($("adminPass").value)!==config.passwordHash){$("adminMsg").textContent="Password non corretta.";return}adminAuthenticated=true;closeAdminLogin();openAdminPanel()}
-function openAdminPanel(){$("cfgUM").value=config.umId||"";$("cfgDesc").value=config.description||"";renderNuclei();renderAdminPlants();renderPersonnel();checkPPTemplate();if($("ppLastProgressiveAdmin"))$("ppLastProgressiveAdmin").value=ppLastProgressive||0;$("adminPanel").classList.remove("hidden")}
+async function adminLogin(){if(currentUserRole!=="admin"){appToast("Accesso non autorizzato.","err",4200);return;}adminAuthenticated=true;closeAdminLogin();openAdminPanel()}
+function openAdminPanel(){if(currentUserRole!=="admin"){appToast("Accesso riservato agli amministratori.","err",4200);return;}adminAuthenticated=true;$("cfgUM").value=config.umId||"";$("cfgDesc").value=config.description||"";renderNuclei();renderAdminPlants();renderPersonnel();checkPPTemplate();if($("ppLastProgressiveAdmin"))$("ppLastProgressiveAdmin").value=ppLastProgressive||0;$("adminPanel").classList.remove("hidden")}
 function closeAdminPanel(){adminAuthenticated=false;$("adminPanel").classList.add("hidden");refreshConfigUI()}
 function renderNuclei(){$("nucleiList").innerHTML=(config.nuclei||[]).map((n,i)=>`<div class="nucleo-pill">${esc(n)} <button onclick="removeNucleo(${i})">×</button></div>`).join("")}
 function addNucleo(){let v=$("newNucleo").value.trim();if(v&&!config.nuclei.some(n=>norm(n)===norm(v)))config.nuclei.push(v);$("newNucleo").value="";renderNuclei();renderAdminPlants()}
 function removeNucleo(i){let n=config.nuclei[i];if(MASTER.some(x=>norm(x.nucleo)===norm(n))&&!confirm(`Il nucleo ${n} è associato a sezionatori. Rimuoverlo comunque dall'elenco?`))return;config.nuclei.splice(i,1);renderNuclei();renderAdminPlants()}
-async function saveConfig(){let um=$("cfgUM").value.trim();if(!um){alert("Inserisci l'identificativo UM.");return}config.umId=um;config.description=$("cfgDesc").value.trim();let p=$("newPass").value,p2=$("newPass2").value;if(p||p2){if(p.length<6){alert("Password: minimo 6 caratteri.");return}if(p!==p2){alert("Le password non coincidono.");return}config.passwordHash=await hashText(p)}await persistAll();$("newPass").value=$("newPass2").value="";refreshConfigUI();alert("Configurazione salvata.")}
+async function saveConfig(){if(currentUserRole!=="admin"){appToast("Accesso non autorizzato.","err",4200);return;}let um=$("cfgUM").value.trim();if(!um){alert("Inserisci l'identificativo UM.");return}config.umId=um;config.description=$("cfgDesc").value.trim();await persistAll();refreshConfigUI();alert("Configurazione salvata.")}
 async function persistAll(syncPlants=false){cacheAllLocal();await cloudSaveGlobals();if(syncPlants)await syncAllPlantStates();}
 function plantRow(x,i){let opts=(config.nuclei||[]).map(n=>`<option ${norm(n)===norm(x.nucleo)?"selected":""}>${esc(n)}</option>`).join("");return `<tr data-i="${i}"><td><input data-k="id" value="${esc(x.id||"")}"></td><td><input data-k="definition" value="${esc(x.definition||"")}"></td><td><input data-k="localita" value="${esc(x.localita||"")}"></td><td><select data-k="nucleo"><option></option>${opts}</select></td><td><input data-k="kmI" value="${esc(x.kmI??"")}"></td><td><input data-k="kmF" value="${esc(x.kmF??"")}"></td><td><select data-k="stato"><option ${x.stato==="ESER"?"selected":""}>ESER</option><option ${x.stato==="DISATTIVATO"?"selected":""}>DISATTIVATO</option></select></td><td><button class="admin-btn" onclick="savePlantRow(${i})">SALVA</button> <button class="admin-btn danger" onclick="deletePlant(${i})">ELIMINA</button></td></tr>`}
 function renderAdminPlants(){let q=norm($("adminSearch")?.value||"");let arr=MASTER.map((x,i)=>({x,i})).filter(o=>!q||norm([o.x.id,o.x.localita,o.x.nucleo,o.x.definition].join(" ")).includes(q));$("adminPlants").innerHTML=arr.slice(0,500).map(o=>plantRow(o.x,o.i)).join("")}
