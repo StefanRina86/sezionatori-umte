@@ -1,0 +1,18 @@
+PACCHETTO DEPLOY SICURO - SEZIONATORI UMTE
+
+QUESTA VERSIONE NON CONTIENE:
+- l'anagrafica dei 247 impianti nel codice pubblico;
+- i PDF RFI nel repository GitHub.
+
+I dati vengono caricati da Supabase solo dopo login.
+I PDF sono caricati in un bucket Supabase PRIVATO e aperti con link temporanei firmati.
+
+Ordine:
+1. Eseguire SUPABASE_SETUP_SEZIONATORI_UMTE.sql in Supabase SQL Editor.
+2. Creare/controllare l'utente in Authentication > Users.
+3. Caricare i PDF del pacchetto DOCUMENTI_UMTE_DA_CARICARE_SU_SUPABASE.zip
+   nel bucket privato `umte-docs`.
+4. Caricare SOLO il contenuto di Sezionatori_UMTE_DEPLOY_SICURO_GITHUB.zip nel repository GitHub.
+5. Attivare GitHub Pages main / root.
+6. Impostare Site URL e Redirect URLs in Supabase Authentication.
+7. Testare login, 247 impianti, bozza e sincronizzazione PC/telefono.

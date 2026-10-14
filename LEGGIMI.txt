@@ -1,0 +1,19 @@
+SEZIONATORI UMTE — VERSIONE SINCRONIZZATA
+
+PC:
+- gestionale completo;
+- Dashboard, Sezionatori, Documenti/Normativa, PP, Critici, Amministrazione.
+
+TELEFONO:
+- solo ricerca impianto e inserimento manutenzione;
+- Dashboard/PP/Documenti/Critici/Amministrazione nascosti.
+
+SINCRONIZZAZIONE:
+- usa il progetto Supabase già configurato in config.js;
+- è richiesto un utente Supabase email/password;
+- PC e telefono devono accedere alla stessa app pubblicata e allo stesso archivio Supabase.
+- se offline, il salvataggio viene accodato e sincronizzato quando torna la connessione.
+
+PUBBLICAZIONE:
+- caricare TUTTI i file e la cartella DOCUMENTI nella root di un repository GitHub;
+- attivare GitHub Pages da main / root.
