@@ -1,0 +1,1326 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#092c5c"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="apple-mobile-web-app-title" content="Sezionatori UMTE">
+<link rel="manifest" href="manifest.webmanifest">
+<script src="config.js"></script>
+<title>Censimento Sezionatori UMTE</title>
+<style>
+:root{--navy:#092c5c;--blue:#0b5cab;--green:#138a3d;--yellow:#f4c542;--orange:#ef7d00;--red:#c9222a;--bg:#eef3f8;--line:#d8e0ea;--text:#1a2433;--muted:#66758a;--card:#fff}
+*{box-sizing:border-box}body{margin:0;font-family:Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--text)}
+header{height:64px;background:linear-gradient(90deg,#06244e,#0a3b79);color:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 22px;position:sticky;top:0;z-index:10;box-shadow:0 2px 10px #0002}
+.brand{font-weight:800;font-size:22px;letter-spacing:.3px}.brand small{display:block;font-size:11px;font-weight:600;opacity:.75;letter-spacing:.7px;margin-top:2px}.saved{font-size:12px;opacity:.85}
+.layout{display:grid;grid-template-columns:220px 1fr;min-height:calc(100vh - 64px)}
+aside.menu{background:#fff;border-right:1px solid var(--line);padding:14px;position:sticky;top:64px;height:calc(100vh - 64px)}
+.navbtn{width:100%;text-align:left;background:transparent;border:0;border-radius:8px;padding:11px 12px;font-weight:700;color:#28415f;margin-bottom:5px;cursor:pointer}.navbtn.active,.navbtn:hover{background:#eaf1f9;color:var(--navy)}
+main{padding:18px;min-width:0}.hidden{display:none!important}.grid{display:grid;gap:12px}.kpis{grid-template-columns:repeat(5,minmax(130px,1fr))}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:15px;box-shadow:0 1px 3px #00000008}
+.kpi .label{font-size:11px;font-weight:800;text-transform:uppercase;color:var(--muted)}.kpi .value{font-size:30px;font-weight:850;margin-top:4px}
+.two{grid-template-columns:1.15fr .85fr}.section-title{font-size:18px;margin:0 0 12px}
+.barrow{display:grid;grid-template-columns:125px 1fr 48px;gap:9px;align-items:center;margin:10px 0}.bar{height:11px;border-radius:20px;background:#e7edf5;overflow:hidden}.bar span{display:block;height:100%;background:var(--blue)}
+.toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px}.toolbar input,.toolbar select{padding:9px 10px;border:1px solid #b9c7d8;border-radius:8px;background:#fff}.toolbar input[type=search]{min-width:320px;flex:1}
+.btn{border:0;border-radius:8px;padding:9px 13px;font-weight:750;cursor:pointer;background:var(--navy);color:#fff}.btn.secondary{background:#fff;color:var(--navy);border:1px solid #a8bad0}.btn.green{background:var(--green)}
+.table-wrap{border:1px solid var(--line);border-radius:10px;background:#fff;overflow:auto;max-height:72vh}table{width:100%;border-collapse:separate;border-spacing:0}th,td{padding:9px 10px;border-bottom:1px solid #e6ebf1;text-align:left;font-size:12px;white-space:nowrap}th{position:sticky;top:0;background:var(--navy);color:#fff;z-index:1}
+.tag{display:inline-block;padding:3px 8px;border-radius:999px;font-weight:800;font-size:11px}.A,.ROSSO,.KO{background:#ffe0e2;color:#a20008}.B,.ARANCIONE{background:#ffe7cc;color:#a65000}.C,.GIALLO{background:#fff3bf;color:#755300}.D,.VERDE,.SI,.OK{background:#dcf3e1;color:#0b6c2a}.NO,.NA{background:#e9edf2;color:#596575}.BOZZA{background:#e8eefc;color:#274c91}
+#sheet{position:fixed;right:0;top:0;width:min(760px,100vw);height:100vh;background:#f7f9fc;z-index:100;box-shadow:-10px 0 30px #0003;transform:translateX(100%);transition:.2s;overflow:auto}
+#sheet.open{transform:none}.sheet-head{position:sticky;top:0;background:var(--navy);color:#fff;padding:15px 18px;display:flex;justify-content:space-between;align-items:center;z-index:2}.sheet-head h2{font-size:18px;margin:0}
+.sheet-body{padding:15px}.group{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:12px}.group h3{margin:0 0 12px;font-size:14px;color:var(--navy)}
+.fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.field label{display:block;font-size:10px;text-transform:uppercase;font-weight:800;color:var(--muted);margin-bottom:4px}.field input,.field select,.field textarea{width:100%;border:1px solid #b9c7d8;border-radius:7px;padding:8px;background:#fff;font:inherit}.field textarea{min-height:72px}.readonly{background:#f1f5f9!important;color:#40516a}.full{grid-column:1/-1}
+.results{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.result{border:1px solid var(--line);border-radius:10px;padding:10px;background:#fafcff}.result small{display:block;color:var(--muted);font-weight:700;font-size:10px;text-transform:uppercase}.result strong{display:block;font-size:18px;margin-top:3px}
+.sheet-actions{position:sticky;bottom:0;padding:12px;background:#fff;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:8px}.notice{font-size:12px;color:#51647d;background:#edf4fb;border-left:4px solid var(--blue);padding:10px;border-radius:6px}.muted{color:var(--muted);font-size:12px}
+@media(max-width:900px){.layout{grid-template-columns:1fr}aside.menu{display:none}.kpis{grid-template-columns:repeat(2,1fr)}.two{grid-template-columns:1fr}.toolbar input[type=search]{min-width:0;width:100%}.fields{grid-template-columns:1fr}.results{grid-template-columns:repeat(2,1fr)}main{padding:10px}.table-wrap{max-height:none}header{padding:0 14px}.saved{display:none}}
+
+.archive-gate{
+  position:fixed;inset:0;background:rgba(5,25,55,.76);z-index:9999;
+  display:flex;align-items:center;justify-content:center;padding:20px
+}
+.archive-box{
+  width:min(620px,95vw);background:#fff;border-radius:16px;padding:26px;
+  box-shadow:0 20px 60px rgba(0,0,0,.35);border:3px solid #0b5cab
+}
+.archive-box h2{margin:0 0 10px;color:#092c5c;font-size:24px}
+.archive-box p{margin:8px 0;color:#40516a;line-height:1.45}
+.archive-box .archive-cta{
+  width:100%;margin-top:16px;padding:15px 18px;border:0;border-radius:10px;
+  background:#0b5cab;color:#fff;font-size:17px;font-weight:800;cursor:pointer
+}
+.archive-box .archive-cta:hover{background:#084b8d}
+.archive-state{
+  margin-top:12px;padding:10px 12px;border-radius:8px;background:#eef5fb;
+  color:#28415f;font-size:12px
+}
+.archive-chip{
+  display:inline-block;margin-left:10px;padding:5px 9px;border-radius:999px;
+  font-size:11px;font-weight:800;background:#dff3e6;color:#0b6c2a
+}
+.archive-chip.off{background:#ffe6e6;color:#a20008}
+
+
+.admin-btn{background:#8b1e2d;color:#fff;border:0;border-radius:8px;padding:8px 12px;font-weight:800;cursor:pointer}.admin-overlay{position:fixed;inset:0;background:rgba(4,20,43,.78);z-index:10020;display:flex;align-items:center;justify-content:center;padding:18px}.admin-box{width:min(980px,97vw);max-height:92vh;overflow:auto;background:#fff;border-radius:16px;padding:24px;box-shadow:0 20px 60px rgba(0,0,0,.35)}.admin-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.admin-box h2{margin:0 0 14px;color:#092c5c}.admin-box h3{margin:22px 0 9px;color:#173b65}.admin-box input,.admin-box select{width:100%;padding:9px;border:1px solid #cbd5e1;border-radius:7px}.admin-actions{display:flex;gap:9px;justify-content:flex-end;margin-top:18px}.admin-note{font-size:12px;color:#52657a;background:#f3f7fb;padding:10px;border-radius:8px}.nuclei-list{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}.nucleo-pill{display:flex;gap:7px;align-items:center;background:#eef4fa;border-radius:999px;padding:7px 10px}.nucleo-pill button{border:0;background:transparent;color:#a00000;font-weight:900;cursor:pointer}.admin-table{width:100%;border-collapse:collapse;font-size:12px}.admin-table th,.admin-table td{padding:7px;border-bottom:1px solid #e4e9ef;text-align:left}.admin-table input,.admin-table select{padding:6px}.danger{background:#a1121d!important}.setup-gate{position:fixed;inset:0;background:rgba(5,25,55,.82);z-index:10010;display:flex;align-items:center;justify-content:center;padding:20px}.setup-box{width:min(650px,95vw);background:#fff;border-radius:16px;padding:26px;border:3px solid #0b5cab}.setup-box h2{margin:0 0 10px;color:#092c5c}.setup-box input{width:100%;padding:11px;margin:5px 0 10px;border:1px solid #cbd5e1;border-radius:8px}.top-admin{margin-left:8px}.fileline{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.fileline input[type=file]{max-width:380px}.small{font-size:11px}.hidden{display:none!important}
+
+.doc-overlay{position:fixed;inset:0;background:rgba(4,17,38,.62);z-index:90;display:flex;align-items:stretch;justify-content:flex-end}.doc-overlay.hidden{display:none}.doc-panel{width:min(1120px,96vw);background:#f5f7fb;height:100%;box-shadow:-10px 0 30px rgba(0,0,0,.18);display:grid;grid-template-rows:auto 1fr}.doc-head{background:#0b2345;color:#fff;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px}.doc-head h2{margin:0;font-size:18px}.doc-body{display:grid;grid-template-columns:360px 1fr;min-height:0}.doc-list{padding:14px;overflow:auto;border-right:1px solid var(--line);background:#fff}.doc-view{min-width:0;min-height:0;background:#dfe5ee}.doc-view iframe{width:100%;height:100%;border:0;background:#fff}.doc-card{border:1px solid var(--line);border-radius:10px;padding:10px;margin-bottom:9px;cursor:pointer;background:#fff}.doc-card:hover{border-color:#8095b3}.doc-card.active{outline:2px solid #0b2345}.doc-card b{display:block;color:#0b2345;margin-bottom:3px}.doc-card small{display:block;color:#667085;line-height:1.35}.doc-badge{display:inline-block;font-size:10px;font-weight:800;padding:3px 6px;border-radius:999px;background:#e7eef8;color:#0b2345;margin-right:5px}.refbox{margin-top:12px;padding:12px;border-radius:10px;background:#eef3f9;border:1px solid #d8e1ed;font-size:12px;line-height:1.45}.rifbtn{margin-left:7px;border:0;border-radius:6px;padding:3px 7px;font-size:10px;font-weight:800;background:#e7eef8;color:#0b2345;cursor:pointer}.docs-inline{margin-top:12px;padding:12px;border:1px solid var(--line);border-radius:10px;background:#f8fafc}.docs-inline b{color:#0b2345}.docs-inline button{margin-top:8px}@media(max-width:800px){.doc-body{grid-template-columns:1fr}.doc-list{max-height:42vh;border-right:0;border-bottom:1px solid var(--line)}.doc-view{min-height:50vh}}
+.pp-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.pp-grid .full{grid-column:1/-1}.pp-select-list{max-height:280px;overflow:auto;border:1px solid var(--line);border-radius:10px;background:#fff}.pp-select-row{display:grid;grid-template-columns:34px 1.2fr 1fr .8fr;gap:8px;align-items:center;padding:9px 10px;border-bottom:1px solid #e6ebf1;font-size:12px}.pp-select-row:last-child{border-bottom:0}.pp-select-row input[type=checkbox]{width:18px;height:18px}.pp-summary{background:#eef4fa;border-left:4px solid var(--blue);padding:10px 12px;border-radius:8px;font-size:12px}.person-status{font-size:10px;font-weight:800;padding:3px 7px;border-radius:999px}.person-status.on{background:#dcf3e1;color:#0b6c2a}.person-status.off{background:#e9edf2;color:#596575}.admin-table .checkcell{text-align:center}.admin-table input[type=checkbox]{width:18px;height:18px}.pp-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:12px}.pp-preview{white-space:pre-wrap;background:#f8fafc;border:1px solid var(--line);border-radius:10px;padding:12px;font-size:12px;line-height:1.45;min-height:90px}@media(max-width:800px){.pp-grid{grid-template-columns:1fr}.pp-select-row{grid-template-columns:30px 1fr}.pp-select-row span:nth-child(3),.pp-select-row span:nth-child(4){display:none}}
+.due-badge{display:inline-block;padding:4px 7px;border-radius:999px;font-weight:800;font-size:11px}.due-SCADUTO{background:#fde7e8;color:#a20008}.due-30{background:#fff0dc;color:#9a4d00}.due-60{background:#fff8d8;color:#705b00}.due-OK{background:#e5f5e9;color:#12652d}.due-ND{background:#edf1f5;color:#66758a} .due-date{font-weight:800} tr.overdue-row td{background:#fff7f7} tr.soon-row td{background:#fffaf1}
+#archiveGate{display:none!important}
+/* === MOBILE / PWA === */
+.mobile-nav{display:none}.mobile-list{display:none}.mobile-admin{display:none}.plant-card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:10px;box-shadow:0 1px 3px #0000000a;cursor:pointer}.plant-card:active{transform:scale(.995)}
+.plant-card-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.plant-card-id{font-size:15px;font-weight:850;color:var(--navy)}.plant-card-place{font-weight:750;margin-top:3px}.plant-card-meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}.plant-card-meta span{font-size:11px;background:#eef3f8;border-radius:999px;padding:4px 7px;color:#40516a}.plant-card-due{margin-top:9px;display:flex;align-items:center;justify-content:space-between;gap:8px}.plant-card small{color:var(--muted)}
+.history-list{display:grid;gap:8px}.history-item{border:1px solid var(--line);border-radius:10px;padding:10px;background:#fafcff}.history-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:5px}.history-meta{font-size:11px;color:var(--muted);line-height:1.4}.history-note{font-size:12px;margin-top:6px;white-space:pre-wrap}.history-photo{display:block;max-width:180px;max-height:120px;border-radius:8px;margin-top:7px;border:1px solid var(--line)}
+.photo-preview{display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap}.photo-preview img{max-width:220px;max-height:160px;border-radius:10px;border:1px solid var(--line)}.photo-actions{display:flex;gap:8px;flex-wrap:wrap}.photo-hint{font-size:11px;color:var(--muted);line-height:1.35}
+.touch-open{cursor:pointer}
+@media(max-width:900px){
+  body{padding-bottom:calc(70px + env(safe-area-inset-bottom));-webkit-tap-highlight-color:transparent}
+  header{height:58px;padding:0 10px;gap:8px}.brand{font-size:16px;line-height:1.05;min-width:0}.brand small{font-size:9px}.saved{display:none}.mobile-admin{display:inline-flex;border:0;background:#fff1;color:#fff;border:1px solid #ffffff55;border-radius:8px;padding:7px 9px;font-weight:800;font-size:11px;cursor:pointer;white-space:nowrap}
+  .layout{min-height:calc(100vh - 58px)}main{padding:10px 9px}.kpis{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.kpi{padding:12px}.kpi .value{font-size:25px}.two{grid-template-columns:1fr}.card{border-radius:11px}.barrow{grid-template-columns:90px 1fr 38px;font-size:12px}
+  .toolbar{display:grid;grid-template-columns:1fr 1fr;gap:7px}.toolbar input[type=search]{grid-column:1/-1;min-width:0;width:100%}.toolbar select{width:100%;min-width:0}.toolbar #count{grid-column:1/-1}.toolbar input,.toolbar select{font-size:16px;padding:10px 9px}
+  .mobile-nav{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;left:0;right:0;bottom:0;z-index:80;background:#fff;border-top:1px solid var(--line);padding:5px 4px calc(5px + env(safe-area-inset-bottom));box-shadow:0 -4px 18px #0002}.mobile-nav button{border:0;background:transparent;color:#52657a;padding:5px 2px 4px;font-size:9px;font-weight:800;line-height:1.05;min-height:48px;border-radius:8px}.mobile-nav button b{display:block;font-size:18px;line-height:20px;font-weight:700;margin-bottom:2px}.mobile-nav button.active{background:#eaf1f9;color:var(--navy)}
+  #plants .table-wrap,#critical .table-wrap{display:none}.mobile-list{display:block}.plant-card .tag,.plant-card .due-badge{font-size:10px}
+  #sheet{width:100vw}.sheet-head{padding:11px 10px;padding-top:calc(11px + env(safe-area-inset-top));gap:8px}.sheet-head h2{font-size:15px;min-width:0}.sheet-head .btn{padding:8px 10px}.sheet-body{padding:9px}.group{padding:11px;margin-bottom:9px}.group h3{font-size:13px}.fields{grid-template-columns:1fr}.field input,.field select,.field textarea{font-size:16px;min-height:44px}.results{grid-template-columns:repeat(2,1fr)}.result strong{font-size:17px}.sheet-actions{padding:9px 9px calc(9px + env(safe-area-inset-bottom));display:grid;grid-template-columns:1fr 1.4fr}.sheet-actions .btn{min-height:45px;font-size:13px}
+  .doc-panel{width:100vw}.doc-head{padding-top:calc(12px + env(safe-area-inset-top))}.doc-head h2{font-size:15px}.doc-list{max-height:46vh}.doc-view{min-height:44vh}
+  .admin-overlay{align-items:flex-start;padding:0}.admin-box{width:100vw;max-height:100vh;height:100vh;border-radius:0;padding:14px;padding-top:calc(14px + env(safe-area-inset-top));padding-bottom:calc(80px + env(safe-area-inset-bottom))}.admin-grid{grid-template-columns:1fr}.admin-table{font-size:11px}.fileline input[type=file]{max-width:100%}
+  .pp-actions .btn{flex:1 1 160px;min-height:44px}.pp-preview{font-size:12px}.pp-grid input,.pp-grid select,.pp-grid textarea{font-size:16px!important}
+}
+@media(max-width:430px){.toolbar{grid-template-columns:1fr}.toolbar input[type=search],.toolbar #count{grid-column:1}.kpis{grid-template-columns:repeat(2,1fr)}.section-title{font-size:16px}.plant-card-head{align-items:center}.plant-card-due{align-items:flex-end}.mobile-nav button{font-size:8px}.mobile-nav button b{font-size:17px}}
+
+.cloud-login{position:fixed;inset:0;z-index:20000;background:linear-gradient(145deg,#061d3f,#0a3f7e);display:flex;align-items:center;justify-content:center;padding:18px}
+.cloud-login.hidden{display:none!important}.cloud-box{width:min(430px,96vw);background:#fff;border-radius:18px;padding:24px;box-shadow:0 24px 70px #0007}.cloud-box h2{margin:0 0 8px;color:#092c5c}.cloud-box p{color:#607086;font-size:13px;line-height:1.45}.cloud-box label{display:block;font-size:11px;text-transform:uppercase;font-weight:800;color:#66758a;margin-top:10px}.cloud-box input{width:100%;padding:11px;border:1px solid #b9c7d8;border-radius:8px;margin-top:4px;font-size:16px}.cloud-box button{width:100%;margin-top:14px;padding:12px;border:0;border-radius:9px;background:#092c5c;color:#fff;font-weight:850;cursor:pointer}.cloud-msg{margin-top:12px;font-size:12px;line-height:1.4;padding:9px 10px;background:#f1f5f9;border-radius:8px;color:#40516a}.cloud-msg.err{background:#ffe8e8;color:#991b1b}.cloud-msg.ok{background:#e5f6e9;color:#0b6c2a}.cloud-user{display:inline-flex;gap:7px;align-items:center;margin-left:8px}.cloud-user button{border:1px solid #ffffff55;background:#fff1;color:#fff;border-radius:7px;padding:5px 8px;font-weight:800;cursor:pointer}.sync-online{background:#dff3e6!important;color:#0b6c2a!important}.sync-offline{background:#fff3bf!important;color:#755300!important}.sync-error{background:#ffe0e2!important;color:#a20008!important}
+@media(max-width:900px){.cloud-user .email{display:none}.cloud-user button{font-size:10px;padding:5px 7px}}
+
+
+/* === MODALITÀ MOBILE CAMPO: SOLO INSERIMENTO MANUTENZIONE === */
+.mobile-field-intro{display:none}
+.mobile-maint-cta{display:none}
+.app-toast{
+  position:fixed;left:50%;top:76px;transform:translateX(-50%) translateY(-12px);
+  z-index:30000;min-width:min(460px,92vw);max-width:92vw;padding:12px 15px;
+  border-radius:10px;font-weight:850;font-size:13px;line-height:1.35;
+  box-shadow:0 12px 35px #0003;opacity:0;pointer-events:none;transition:.2s;
+  background:#e7eef8;color:#0b2345;border:1px solid #b9c8dc
+}
+.app-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.app-toast.ok{background:#dff3e6;color:#0b6c2a;border-color:#9bd2aa}
+.app-toast.warn{background:#fff3bf;color:#755300;border-color:#e8ca5d}
+.app-toast.err{background:#ffe0e2;color:#a20008;border-color:#efa2a7}
+.doc-open-btn{margin-top:8px;border:1px solid #9fb2c9;background:#f7f9fc;color:#0b2345;border-radius:7px;padding:5px 8px;font-size:10px;font-weight:850;cursor:pointer}
+@media(max-width:900px){
+  body{padding-bottom:12px!important}
+  .mobile-admin,.top-admin,.mobile-nav{display:none!important}
+  aside.menu{display:none!important}
+  #dash,#pp,#critical{display:none!important}
+  #plants{display:block!important}
+  header{height:58px;padding:0 12px}
+  header .brand{font-size:16px}
+  header .brand small{font-size:9px}
+  .layout{display:block;min-height:calc(100vh - 58px)}
+  main{padding:10px 9px 18px}
+  .mobile-field-intro{
+    display:block;background:#eaf4ff;border:1px solid #b9d5f0;border-radius:12px;
+    padding:11px 12px;margin:0 0 10px;color:#173b63;font-size:12px;line-height:1.4
+  }
+  .mobile-field-intro b{display:block;font-size:14px;margin-bottom:3px;color:#092c5c}
+  #plants .toolbar{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+  #plants .toolbar #q{grid-column:1/-1}
+  #plants .toolbar #pf,#plants .toolbar #cf,#plants .toolbar #kmf{display:none!important}
+  #plants .toolbar #count{grid-column:1/-1}
+  #plants .toolbar input,#plants .toolbar select{font-size:16px;min-height:44px}
+  #plants .table-wrap{display:none!important}
+  #mobilePlants{display:block!important}
+  .plant-card{padding:13px;margin-bottom:10px}
+  .mobile-maint-cta{
+    display:block;margin-top:10px;background:#092c5c;color:#fff;text-align:center;
+    border-radius:8px;padding:9px 10px;font-weight:850;font-size:12px;letter-spacing:.15px
+  }
+  #sheet{width:100vw}
+  #historyGroup{display:none!important}
+  .sheet-head{padding:11px 10px;padding-top:calc(11px + env(safe-area-inset-top))}
+  .sheet-body{padding:9px}
+  .sheet-actions{
+    padding:9px 9px calc(9px + env(safe-area-inset-bottom));
+    display:grid;grid-template-columns:1fr 1.35fr;gap:8px
+  }
+  .sheet-actions .btn{min-height:48px;font-size:13px}
+}
+@media(max-width:430px){
+  #plants .toolbar{grid-template-columns:1fr}
+  #plants .toolbar #q,#plants .toolbar #count{grid-column:1}
+}
+
+
+#mobileAdminBtn,#topAdminBtn{display:none}
+body.role-admin #topAdminBtn{display:inline-flex!important}
+@media(max-width:900px){
+  body.role-admin #topAdminBtn{display:none!important}
+  body.role-admin #mobileAdminBtn{display:inline-flex!important}
+}
+</style></head><body><div id="appToast" class="app-toast" role="status" aria-live="polite"></div><div id="cloudLogin" class="cloud-login hidden"><div class="cloud-box">
+<h2>Sezionatori UMTE</h2>
+<p>Accesso riservato agli utenti autorizzati. I dati vengono sincronizzati con l'archivio centrale.</p>
+<div id="cloudConfigWarning" class="cloud-msg err hidden">Configurazione cloud mancante. Compila <b>config.js</b> prima della pubblicazione.</div>
+<label>Email RFI</label><input id="cloudEmail" type="email" autocomplete="username" placeholder="nome.cognome@rfi.it"><label>Password</label><input id="cloudPassword" type="password" autocomplete="current-password" placeholder="Password">
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px">
+<button onclick="cloudLogin()">ACCEDI</button>
+<button type="button" style="background:#fff;color:#092c5c;border:1px solid #9fb2c9" onclick="cloudFirstAccess()">PRIMO ACCESSO</button>
+</div>
+<div id="cloudLoginMsg" class="cloud-msg">Primo accesso: inserisci la mail RFI e usa il tuo CID di 6 cifre come password, poi premi PRIMO ACCESSO.</div>
+</div></div>
+<div id="archiveGate" class="archive-gate">
+  <div class="archive-box">
+    <h2>Collega Archivio Sezionatori</h2>
+    <p>Per utilizzare il censimento devi collegare, una sola volta su questo PC/browser, la cartella condivisa <b>Archivio Sezionatori</b>.</p>
+    <p>Dopo il collegamento l'app userà sempre lo stesso archivio condiviso e questa schermata non comparirà più su questo PC/browser.</p>
+    <button class="archive-cta" onclick="connectArchive()">COLLEGA ARCHIVIO SEZIONATORI</button>
+    <div id="archiveState" class="archive-state">Stato: archivio non collegato.</div>
+  </div>
+</div>
+
+
+<div id="setupGate" class="setup-gate hidden"><div class="setup-box"><h2>Prima configurazione</h2><p>Configura l’Unità Manutentiva. Questa operazione viene eseguita una sola volta sull’archivio.</p><label>Identificativo UM</label><input id="setupUM" placeholder="es. UMTE1 Gallarate"><label>Primo nucleo</label><input id="setupNucleo" placeholder="es. Gallarate"><label>Crea password amministratore</label><input id="setupPass" type="password"><label>Conferma password</label><input id="setupPass2" type="password"><button class="archive-cta" onclick="completeSetup()">CREA CONFIGURAZIONE UM</button><div id="setupMsg" class="archive-state">La password potrà essere condivisa solo con chi è autorizzato a modificare l’anagrafica.</div></div></div>
+<div id="adminLogin" class="admin-overlay hidden"><div class="admin-box" style="max-width:450px"><h2>Accesso amministrazione</h2><input id="adminPass" type="password" placeholder="Password amministratore"><div id="adminMsg" class="admin-note">Inserisci la password configurata per questa UM.</div><div style="margin-top:10px"><button class="btn secondary" onclick="startPasswordReset()">PASSWORD DIMENTICATA / RESET</button></div><div class="admin-actions"><button class="btn secondary" onclick="closeAdminLogin()">ANNULLA</button><button class="admin-btn" onclick="adminLogin()">ENTRA</button></div></div></div>
+
+<div id="passwordResetPanel" class="admin-panel hidden">
+  <div class="admin-box" style="max-width:520px">
+    <h2>Reset password amministratore</h2>
+    <div class="locked-banner">Operazione riservata. Il reset non modifica né elimina l'anagrafica dei sezionatori o le verifiche archiviate.</div>
+    <p>Inserisci il <b>codice di recupero amministratore</b> generato durante la configurazione.</p>
+<label>Codice di recupero</label>
+<input id="resetRecoveryCode" autocomplete="off" placeholder="Codice di recupero">
+    <label style="display:block;margin-top:10px">Nuova password</label>
+    <input id="resetNewPass" type="password">
+    <label style="display:block;margin-top:10px">Conferma nuova password</label>
+    <input id="resetNewPass2" type="password">
+    <div class="admin-note" style="margin-top:12px">
+      Nota: in questa versione HTML locale questa è una protezione operativa, non un recupero identità centralizzato. Per una sicurezza aziendale reale servirebbe autenticazione tramite sistema centrale.
+    </div>
+    <div class="admin-actions">
+      <button onclick="closePasswordReset()">ANNULLA</button>
+      <button class="admin-btn" onclick="confirmPasswordReset()">RESET PASSWORD</button>
+    </div>
+  </div>
+</div>
+
+<div id="adminPanel" class="admin-overlay hidden"><div class="admin-box"><h2>Amministrazione Censimento Sezionatori</h2><div class="admin-grid"><div><label>Identificativo UM</label><input id="cfgUM"></div><div><label>Descrizione / territorio</label><input id="cfgDesc"></div></div><h3>Nuclei presenti</h3><div class="fileline"><input id="newNucleo" placeholder="Nuovo nucleo"><button class="admin-btn" onclick="addNucleo()">AGGIUNGI NUCLEO</button></div><div id="nucleiList" class="nuclei-list"></div><h3>Importazione anagrafica</h3><div class="admin-note">Importa il file Excel standard. L’app legge esclusivamente il foglio IMPORTAZIONE e ignora MAPPATURA_SEDI e ISTRUZIONI. Le righe con mappatura mancante, Nucleo vuoto o Località/Tratta vuota vengono bloccate prima dell’importazione. Se un ID esiste già viene aggiornata solo l’anagrafica e le verifiche restano conservate.</div><div class="fileline" style="margin-top:10px"><input id="importFile" type="file" accept=".xlsx,.xls,.csv"><button class="admin-btn" onclick="importRegistry()">IMPORTA ELENCO</button><button class="btn secondary" onclick="downloadTemplate()">SCARICA MODELLO CSV BASE</button></div><h3>Gestione sezionatori</h3>
+<div class="admin-note" style="border-left:4px solid #a1121d;background:#fff7f7">
+  <b>Azzera controllo singolo sezionatore</b><br>Seleziona il sezionatore da riportare allo stato <b>DA VERIFICARE</b>. L’anagrafica resta invariata; vengono cancellati i dati di controllo associati dopo doppia conferma.
+</div>
+<div class="fileline" style="margin-top:10px">
+  <input id="adminResetPlant" list="adminResetPlantOptions" placeholder="Cerca o seleziona ID / località / nucleo..." style="min-width:360px;max-width:560px">
+  <datalist id="adminResetPlantOptions"></datalist>
+  <button class="admin-btn danger" onclick="resetSelectedPlantControl()">AZZERA CONTROLLO</button>
+</div>
+<div class="fileline" style="margin-top:12px"><button class="admin-btn" onclick="newPlantRow()">+ NUOVO SEZIONATORE</button><input id="adminSearch" placeholder="Cerca ID, località, nucleo..." oninput="renderAdminPlants()" style="max-width:360px"></div><div style="overflow:auto;max-height:340px;margin-top:8px"><table class="admin-table"><thead><tr><th>ID / Sede tecnica</th><th>Definizione</th><th>Località / tratta</th><th>Nucleo</th><th>Km I</th><th>Km F</th><th>Stato</th><th>Azioni</th></tr></thead><tbody id="adminPlants"></tbody></table></div>
+<h3>Personale - Programma per Prove</h3>
+<div class="admin-note">Anagrafica centralizzata utilizzata per compilare automaticamente il Programma per Prove. Puoi gestire cognome, nome, qualifica, CID, telefono, email, nucleo e stato di selezionabilità nel PP. Il flag <b>Selezionabile PP</b> non attribuisce automaticamente la qualifica PES: le abilitazioni devono essere verificate secondo i dati e le procedure vigenti.</div>
+<div class="fileline" style="margin-top:10px"><button class="admin-btn" onclick="newPersonRow()">+ NUOVA PERSONA</button><input id="personImportFile" type="file" accept=".xlsx,.xls,.csv"><button class="admin-btn" onclick="importPersonnel()">IMPORTA PERSONALE</button><button class="btn secondary" onclick="downloadPersonnelTemplate()">SCARICA MODELLO CSV</button><input id="personSearch" placeholder="Cerca nome, CID, qualifica, email, nucleo..." oninput="renderPersonnel()" style="max-width:360px"></div>
+<div style="overflow:auto;max-height:360px;margin-top:8px"><table class="admin-table"><thead><tr><th>Cognome</th><th>Nome</th><th>Qualifica</th><th>CID</th><th>Telefono</th><th>Email</th><th>Nucleo</th><th>Selezionabile PP</th><th>Preposto emergenze</th><th>Attivo</th><th>Azioni</th></tr></thead><tbody id="personRows"></tbody></table></div>
+<h3>Template Programma per Prove</h3>
+<div class="admin-note">Installa il modello PP <b>normalizzato/non protetto</b>. È lo stesso modulo ufficiale, ma reso compatibile con la compilazione automatica. Il file viene salvato nell’<b>archivio centrale protetto</b> e sarà disponibile da tutti i PC autorizzati.</div>
+<div class="fileline" style="margin-top:10px"><input id="ppTemplateFile" type="file" accept="application/pdf,.pdf"><button class="admin-btn" onclick="installPPTemplate()">INSTALLA / AGGIORNA TEMPLATE PP</button><span id="ppTemplateStatus" class="muted">Stato non verificato</span></div>
+<h3>Registro e numerazione PP</h3>
+<div class="admin-note">I PP prodotti non vengono archiviati come file PDF. L’app conserva invece nel registro condiviso tutti i dati utilizzati per generarli, così ogni PP può essere rigenerato in qualsiasi momento. Il numero è assegnato automaticamente in progressione per la UM.</div>
+<div class="fileline" style="margin-top:10px"><label class="muted">Ultimo progressivo PP già utilizzato prima dell’avvio dell’app:</label><input id="ppLastProgressiveAdmin" type="number" min="0" step="1" style="max-width:140px"><button class="btn secondary" onclick="setPPLastProgressive()">ALLINEA NUMERAZIONE INIZIALE</button></div>
+<h3>Accesso amministrativo</h3><div class="admin-note">L’accesso all’Amministrazione è gestito dal ruolo Supabase dell’utente. Non esiste più una seconda password amministratore dell’app.</div>
+    <h3>Backup / ripristino dati</h3>
+    <div class="admin-note">
+      Il file Excel di backup contiene anagrafica, progressive chilometriche, identificazione del sezionatore, tutti i controlli, anomalie, interventi e note. Può essere usato per ripristinare automaticamente il censimento. Password e codice di recupero non vengono esportati.
+    </div>
+    <div class="fileline" style="margin-top:10px">
+      <button class="admin-btn" onclick="exportExcelData()">SCARICA BACKUP EXCEL</button>
+      <input id="backupImportFile" type="file" accept=".xlsx,.xls">
+      <button class="admin-btn" onclick="restoreExcelBackup()">RIPRISTINA DA BACKUP EXCEL</button>
+    </div>
+    <h3 style="color:#8b1e2d">Reset applicazione</h3>
+    <div class="admin-note" style="border-left:4px solid #a1121d;background:#fff3f3">
+      Ripristina l'app come una prima installazione. Verranno cancellati configurazione UM, anagrafica, verifiche, dati locali e collegamento salvato all'archivio. L'operazione richiede nuovamente la password amministratore e una doppia conferma.
+    </div>
+    <div class="admin-row" style="margin-top:10px">
+      <button class="admin-btn danger" onclick="openFactoryReset()">RESET COMPLETO / PRIMA INSTALLAZIONE</button>
+    </div>
+<div class="admin-actions"><button class="btn secondary" onclick="closeAdminPanel()">CHIUDI</button><button class="admin-btn" onclick="saveConfig()">SALVA CONFIGURAZIONE</button></div></div></div>
+<div id="factoryResetPanel" class="admin-overlay hidden"><div class="admin-box" style="max-width:520px">
+  <h2 style="color:#8b1e2d">Reset completo applicazione</h2>
+  <div class="admin-note" style="border-left:4px solid #a1121d;background:#fff3f3">
+    Questa operazione riporta il censimento allo stato di prima installazione. Verranno eliminati anche i dati presenti nel file JSON dell'archivio attualmente collegato.
+  </div>
+  <label style="display:block;margin-top:14px">Password amministratore</label>
+  <input id="factoryResetPass" type="password" placeholder="Inserisci nuovamente la password">
+  <div class="admin-actions">
+    <button class="btn secondary" onclick="closeFactoryReset()">ANNULLA</button>
+    <button class="admin-btn danger" onclick="confirmFactoryReset()">ESEGUI RESET COMPLETO</button>
+  </div>
+</div></div>
+<div id="docsOverlay" class="doc-overlay hidden"><div class="doc-panel"><div class="doc-head"><h2>Documenti / Normativa — Sezionatori TE</h2><button class="admin-btn" onclick="closeDocs()">CHIUDI</button></div><div class="doc-body"><div class="doc-list"><div class="admin-note">Sono mostrati esclusivamente documenti di competenza <b>TE</b>. I documenti SS presenti nel pacchetto sorgente sono esclusi.</div><div style="margin-top:10px"><label class="muted"><b>Sezionatore su cui devi lavorare</b></label><input id="docPlantSearch" list="docPlantOptions" placeholder="Cerca sede tecnica, località, tratta..." oninput="filterDocsByPlant()" style="width:100%;margin-top:5px;padding:9px;border:1px solid #b9c7d8;border-radius:8px"><datalist id="docPlantOptions"></datalist><div id="docPlantInfo" class="muted" style="margin-top:6px">Se non selezioni un impianto vengono mostrati tutti i documenti TE.</div></div><div id="docsList" style="margin-top:10px"></div><div class="refbox"><b>Riferimenti richiamati dalle MOL TE</b><br>RFI DTC P SL 03 1 e Guida Integrativa · IEITE · IPC · RCT · DPR 469/79 · D.Lgs. 81/2008 e s.m.i. · disposizioni/norme di esercizio specifiche d'impianto · schemi elettrici/piani schematici TE aggiornati · manuali d'uso e manutenzione del costruttore.<br><br><b>Nota:</b> questi riferimenti sono censiti perché richiamati dalle MOL; la visualizzazione diretta è disponibile quando il relativo PDF è presente nella cartella DOCUMENTI.</div></div><div class="doc-view"><iframe id="docFrame" title="Visualizzatore documenti"></iframe></div></div></div></div><header><div class="brand">Censimento Sezionatori UMTE<small>MANUTENZIONE TE</small></div><button id="mobileAdminBtn" class="mobile-admin" onclick="openAdminLogin()">ADMIN</button><div class="saved"><span id="archiveChip" class="archive-chip off">CONNESSIONE...</span><span class="cloud-user"><span id="cloudUserEmail" class="email"></span><button onclick="cloudLogout()">ESCI</button></span><button id="topAdminBtn" class="admin-btn top-admin" onclick="openAdminLogin()">AMMINISTRAZIONE</button></div></header>
+<div class="layout">
+<aside class="menu">
+<button class="navbtn active" data-v="dash">Dashboard</button>
+<button class="navbtn" data-v="plants">Sezionatori</button>
+<button class="navbtn" type="button" onclick="openDocs()">Documenti / Normativa</button>
+<button class="navbtn" data-v="pp">Pianifica prove</button>
+<button class="navbtn" data-v="critical">Impianti critici</button>
+</aside>
+<main>
+<section id="dash">
+<div class="grid kpis" id="kpis"></div>
+<div class="grid two" style="margin-top:12px">
+<div class="card"><h3 class="section-title">Avanzamento per nucleo</h3><div id="bars"></div></div>
+<div class="card"><h3 class="section-title">Priorità</h3><div id="prio"></div></div>
+</div>
+<div class="grid two" style="margin-top:12px">
+<div class="card"><h3 class="section-title">Da attenzionare</h3><div id="alerts"></div></div>
+<div class="card"><h3 class="section-title">Scadenze manutentive</h3><div id="dueSummary"></div><div class="notice" style="margin-top:10px">Le date cardine derivano dagli ODL e vengono riportate automaticamente alla prima ricorrenza utile futura. La data reale di verifica resta nello storico e non sposta il calendario.</div></div>
+</div>
+</section>
+
+<section id="plants" class="hidden">
+<div class="mobile-field-intro"><b>Manutenzione sul campo</b>Cerca il sezionatore, apri la scheda e registra gli esiti. I dati vengono salvati nell’archivio centrale quando sei online.</div>
+<div class="toolbar">
+<input id="q" type="search" placeholder="Cerca sede tecnica, località, tratta, nucleo...">
+<select id="nf"><option value="">Tutti i nuclei</option></select>
+<select id="pf"><option value="">Tutte le priorità</option><option>A</option><option>B</option><option>C</option><option>D</option></select>
+<select id="cf"><option value="">Tutti</option><option value="NO">Da completare</option><option value="SI">Completati</option></select>
+<select id="kmf"><option value="">Tutte le chilometriche</option><option value="MANCANTE">Km da completare</option><option value="OK">Km presenti</option></select><select id="duf"><option value="">Tutte le scadenze</option><option value="SCADUTO">Scaduti</option><option value="30">Entro 30 giorni</option><option value="60">Entro 60 giorni</option><option value="OK">Regolari</option><option value="ND">Senza scadenza</option></select>
+<span class="muted" id="count"></span>
+</div>
+<div class="table-wrap"><table><thead><tr><th>Sede tecnica</th><th>Località / tratta</th><th>Nucleo</th><th>Definizione</th><th>Km</th><th>Tipo manovra</th><th>Ultima verifica</th><th>Prossima scadenza</th><th>Stato scadenza</th><th>Priorità</th><th>Verifica</th></tr></thead><tbody id="tbody"></tbody></table></div><div id="mobilePlants" class="mobile-list"></div>
+</section>
+
+<section id="pp" class="hidden">
+<div class="card"><h2 class="section-title">Pianifica Programma per Prove</h2>
+<div class="notice">Seleziona fino a 4 elementi d’impianto per singolo PP, il Responsabile delle Prove e i dati della finestra di prova. L’app recupera automaticamente anagrafica, CID e telefono dal personale configurato.</div>
+<div class="pp-grid" style="margin-top:12px">
+<div><label class="muted">Numero PP — assegnato automaticamente</label><input id="ppNumber" readonly class="readonly" style="width:100%;padding:9px;border:1px solid #b9c7d8;border-radius:8px"></div>
+<div><label class="muted">Piani di Lavoro di riferimento n°</label><input id="ppPdl" placeholder="eventuale riferimento" style="width:100%;padding:9px;border:1px solid #b9c7d8;border-radius:8px"></div>
+<div><label class="muted">Unità consegnataria</label><input id="ppUnitaConsegnataria" style="width:100%;padding:9px;border:1px solid #b9c7d8;border-radius:8px"></div>
+<div><label class="muted">Unità emittente</label><input id="ppUnitaEmittente" style="width:100%;padding:9px;border:1px solid #b9c7d8;border-radius:8px"></div>
+<div class="full"><label class="muted">Filtro rapido personale</label><div style="display:grid;grid-template-columns:minmax(180px,2fr) minmax(160px,1fr);gap:8px"><input id="ppPersonSearch" type="search" placeholder="Cerca cognome, nome, CID, qualifica..." oninput="renderPPPersonnelSelectors()" style="width:100%;padding:9px;border:1px solid #b9c7d8;border-radius:8px"><select id="ppPersonNucleo" onchange="renderPPPersonnelSelectors()" style="width:100%;padding:9px;border:1px solid #b9c7d8;border-radius:8px"><option value="">Tutti i nuclei</option></select></div></div>
+<div><label class="muted">Compilato da</label><select id="ppCompilato" onchange="renderPPSummary()" style="width:100%;padding:9px;border:1px solid #b9c7d8;border-radius:8px"></select></div>
+<div><label class="muted">Verificato da</label><select id="ppVerificato" onchange="renderPPSummary()" style="width:100%;padding:9px;border:1px solid #b9c7d8;border-radius:8px"></select></div>
+<div><label class="muted">Responsabile delle Prove (RP)</label><select id="ppRP" onchange="renderPPSummary()" style="width:100%;padding:9px;border:1px solid #b9c7d8;border-radius:8px"></select></div>
+<div><label class="muted">Preposto interventi di emergenza</label><select id="ppPreposto" style="width:100%;padding:9px;border:1px solid #b9c7d8;border-radius:8px"></select></div>
+<div><label class="muted">Dalle ore</label><input id="ppFrom" type="datetime-local" style="width:100%;padding:9px;border:1px solid #b9c7d8;border-radius:8px"></div>
+<div><label class="muted">Alle ore</label><input id="ppTo" type="datetime-local" style="width:100%;padding:9px;border:1px solid #b9c7d8;border-radius:8px"></div>
+<div class="full"><label class="muted">Obiettivo della prova</label><textarea id="ppObjective" style="width:100%;min-height:70px;padding:9px;border:1px solid #b9c7d8;border-radius:8px">Verifiche funzionali previste dal ciclo di manutenzione dei sezionatori TE selezionati.</textarea></div>
+<div class="full"><label class="muted">Cerca e seleziona sezionatori</label><input id="ppPlantSearch" type="search" placeholder="Cerca sede tecnica, località, nucleo..." oninput="renderPPPlants()" style="width:100%;padding:9px;border:1px solid #b9c7d8;border-radius:8px;margin-bottom:8px"><div id="ppPlants" class="pp-select-list"></div></div>
+<div class="full"><label class="muted">RI — Responsabile dell'impianto</label><div class="admin-note" style="margin:5px 0 8px">Per ogni elemento selezionato indica il RI. L'app recupera automaticamente i dati anagrafici dal personale. La selezione nel PP non sostituisce la verifica delle abilitazioni richieste.</div><div id="ppRIList"></div></div>
+<div class="full"><label class="muted">Configurazione di prova / assetto alla consegna</label><textarea id="ppConfig" placeholder="Indica l'assetto/configurazione con cui l'elemento viene consegnato al RP per la prova: posizione del sezionatore, eventuali vincoli, alimentazioni/sezionamenti e condizioni necessarie all'esecuzione della prova." style="width:100%;min-height:80px;padding:9px;border:1px solid #b9c7d8;border-radius:8px"></textarea></div>
+<div class="full"><label class="muted">a) Attività lavorative di predisposizione di prova</label><textarea id="ppPrep" placeholder="Descrivi le attività da eseguire prima della prova: predisposizione dell'impianto, controlli preliminari, eventuali esclusioni/sezionamenti e condizioni da realizzare prima dell'inizio delle prove." style="width:100%;min-height:70px;padding:9px;border:1px solid #b9c7d8;border-radius:8px"></textarea></div>
+<div class="full"><label class="muted">b) Prove</label><textarea id="ppTests" placeholder="Descrivi esattamente quali prove funzionali devono essere eseguite sull'elemento: apertura/chiusura, comando, controllo, posizione, segnalazioni e verifiche previste per la specifica tipologia di sezionatore." style="width:100%;min-height:100px;padding:9px;border:1px solid #b9c7d8;border-radius:8px"></textarea></div>
+<div class="full"><label class="muted">c) Manovre richiedibili nel corso delle prove</label><textarea id="ppMoves" placeholder="Indica le manovre che potranno essere richieste durante le prove, specificando l'elemento interessato e le posizioni/aperture/chiusure necessarie. Se non sono previste manovre ulteriori, lascia vuoto." style="width:100%;min-height:70px;padding:9px;border:1px solid #b9c7d8;border-radius:8px"></textarea></div>
+<div class="full"><label class="muted">d) Attività intermedie di predisposizione (eventuali)</label><textarea id="ppIntermediate" placeholder="Indica eventuali attività intermedie necessarie tra una prova e la successiva. Se non previste, lascia vuoto." style="width:100%;min-height:55px;padding:9px;border:1px solid #b9c7d8;border-radius:8px"></textarea></div>
+<div class="full"><label class="muted">e) Attività di ripristino a fine prove</label><textarea id="ppRestore" placeholder="Descrivi l'assetto finale da ripristinare al termine delle prove e le attività necessarie per restituire l'impianto nelle condizioni previste." style="width:100%;min-height:70px;padding:9px;border:1px solid #b9c7d8;border-radius:8px"></textarea></div>
+<div class="full"><label class="muted">Organizzazione cantiere</label><textarea id="ppSite" placeholder="Descrivi l'organizzazione delle prove/cantiere: elementi interessati, modalità di esecuzione, eventuali schemi o procedure di riferimento e coordinamento previsto." style="width:100%;min-height:80px;padding:9px;border:1px solid #b9c7d8;border-radius:8px"></textarea></div>
+<div class="full"><label class="muted">Rischi dovuti alle prove</label><textarea id="ppRisks" placeholder="Indica esclusivamente i rischi introdotti o direttamente connessi alle prove previste e alla configurazione adottata. Non inserire rischi generici se non pertinenti alla prova." style="width:100%;min-height:70px;padding:9px;border:1px solid #b9c7d8;border-radius:8px"></textarea></div>
+<div class="full"><label class="muted">Misure di protezione adottate</label><textarea id="ppProtection" placeholder="Indica le misure adottate per eliminare o controllare i rischi dovuti alle prove: condizioni impiantistiche, protezioni, coordinamento, limitazioni e prescrizioni previste dai documenti applicabili." style="width:100%;min-height:70px;padding:9px;border:1px solid #b9c7d8;border-radius:8px"></textarea></div>
+<div class="full"><label class="muted">Note</label><textarea id="ppNotes" placeholder="Eventuali note integrative utili alla gestione delle prove. Se non necessarie, lascia vuoto." style="width:100%;min-height:60px;padding:9px;border:1px solid #b9c7d8;border-radius:8px"></textarea></div>
+</div>
+<div id="ppSummary" class="pp-summary" style="margin-top:12px">Nessun sezionatore selezionato.</div>
+<div class="pp-actions"><button class="btn secondary" onclick="autofillPPTexts()">COMPILA TESTI BASE</button><button class="btn green" onclick="generatePPPDF()">GENERA PDF PP</button></div>
+<div class="card" style="margin-top:14px"><h3 class="section-title">Registro PP della UM</h3><div class="notice">Il registro condiviso conserva i dati di ogni PP prodotto. Il PDF può essere rigenerato in qualsiasi momento senza conservare una copia del file.</div><div style="overflow:auto;max-height:320px;margin-top:10px"><table><thead><tr><th>PP n°</th><th>Generato il</th><th>Periodo prova</th><th>Elementi</th><th>RP</th><th>Azioni</th></tr></thead><tbody id="ppRegisterBody"></tbody></table></div></div>
+</div></section>
+
+<section id="critical" class="hidden"><div class="card"><h2 class="section-title">Impianti critici — Priorità A</h2>
+<div class="table-wrap"><table><thead><tr><th>Sede tecnica</th><th>Località</th><th>Nucleo</th><th>Indice</th><th>Anomalie</th><th>Anomalia / Note</th></tr></thead><tbody id="ctbody"></tbody></table></div><div id="mobileCritical" class="mobile-list"></div></div></section>
+</main></div>
+<nav class="mobile-nav" aria-label="Navigazione mobile">
+<button class="active" data-mobile-v="dash" onclick="show('dash')"><b>⌂</b>Home</button>
+<button data-mobile-v="plants" onclick="show('plants')"><b>≡</b>Impianti</button>
+<button onclick="openDocs()"><b>▤</b>Documenti</button>
+<button data-mobile-v="pp" onclick="show('pp')"><b>✓</b>PP</button>
+<button data-mobile-v="critical" onclick="show('critical')"><b>!</b>Critici</button>
+</nav>
+
+<aside id="sheet">
+<div class="sheet-head"><h2 id="sheetTitle">Scheda Sezionatore</h2><button class="btn secondary" onclick="closeSheet()">CHIUDI</button></div>
+<div class="sheet-body">
+<div class="group"><h3>Anagrafica impianto</h3><div class="fields" id="anag"></div></div>
+<div class="group"><h3>Identificazione sezionatore</h3><div class="fields" id="ident"></div></div>
+<div class="group"><h3>Stato componenti</h3><div class="notice" style="margin-bottom:10px"><b>Esiti:</b> OK = controllo regolare · KO = anomalia riscontrata · N.A. = non applicabile perché quel componente/funzione non è presente sull'apparecchiatura. Un controllo lasciato vuoto è semplicemente non ancora eseguito e può essere salvato in bozza.</div><div class="fields" id="checks"></div></div>
+<div class="group"><h3>Note e interventi</h3><div class="fields" id="notes"></div></div>
+<div class="group hidden" id="photoGroup"><h3>Foto anomalia</h3><div class="photo-preview"><img id="photoPreview" class="hidden" alt="Foto anomalia"><div style="flex:1;min-width:210px"><div class="photo-actions"><label class="btn secondary" style="display:inline-flex;align-items:center;justify-content:center">SCATTA / SCEGLI FOTO<input id="anomalyPhoto" type="file" accept="image/*" capture="environment" onchange="handleAnomalyPhoto(this)" style="display:none"></label><button class="btn secondary" type="button" onclick="clearAnomalyPhoto()">RIMUOVI</button></div><div class="photo-hint" style="margin-top:8px">La foto è collegata a questa verifica. La foto viene compressa prima del salvataggio e sincronizzata con l’archivio centrale.</div></div></div></div>
+<div class="group"><h3>Risultati automatici</h3><div class="results" id="results"></div></div>
+<div class="group"><h3>Storico verifiche</h3><div id="historyList" class="history-list"></div></div>
+</div>
+<div class="sheet-actions"><button class="btn secondary" onclick="saveDraft()">SALVA BOZZA</button><button class="btn green" onclick="saveCurrent()">CHIUDI VERIFICA</button></div>
+</aside>
+
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+<script>
+function startPasswordReset(){
+  closeAdminLogin();
+  const c=config;
+  document.getElementById("resetRecoveryCode").value="";
+  document.getElementById("resetNewPass").value="";
+  document.getElementById("resetNewPass2").value="";
+  document.getElementById("passwordResetPanel").classList.remove("hidden");
+}
+function closePasswordReset(){
+  document.getElementById("passwordResetPanel").classList.add("hidden");
+}
+async function confirmPasswordReset(){
+  const c=config;
+  const recovery=(document.getElementById("resetRecoveryCode").value||"").trim().toUpperCase();
+  const p1=document.getElementById("resetNewPass").value;
+  const p2=document.getElementById("resetNewPass2").value;
+  if(!c.recoveryCodeHash){alert("Nessun codice di recupero configurato.");return;}
+  const rh=await hashText(recovery);
+  if(rh!==c.recoveryCodeHash){alert("Codice di recupero non corretto.");return;}
+  if(!p1 || p1.length<6){alert("La nuova password deve avere almeno 6 caratteri.");return;}
+  if(p1!==p2){alert("Le password non coincidono.");return;}
+  if(!confirm("Confermi il reset della password amministratore? I dati del censimento non verranno modificati.")) return;
+  c.passwordHash=await hashText(p1);
+  config=c;
+  await persistAll();
+  adminAuthenticated=false;
+  closePasswordReset();
+  alert("Password amministratore reimpostata. Ora puoi accedere con la nuova password.");
+  openAdminLogin();
+}
+
+
+function makeRecoveryCode(){
+ const a=new Uint8Array(9); crypto.getRandomValues(a);
+ const chars="ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; let raw="";
+ for(const b of a) raw+=chars[b%chars.length];
+ return raw.match(/.{1,3}/g).join("-");
+}
+async function generateRecoveryCode(){
+ if(!adminAuthenticated) return;
+ if(!confirm("Generare un nuovo codice di recupero? Quello precedente non sarà più valido.")) return;
+ const code=makeRecoveryCode(), c=config;
+ c.recoveryCodeHash=await hashText(code.toUpperCase()); config=c; await persistAll();
+ document.getElementById("recoveryCodeDisplay").value=code;
+ alert("Codice generato. Annotalo ora: dopo la chiusura non sarà più visualizzabile.");
+}
+
+
+function xlsEscape(v){
+  if(v===null||v===undefined) return "";
+  return String(v).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+function exportExcelData(){
+  if(!adminAuthenticated){alert("Accedi all'Amministrazione per esportare i dati.");return;}
+  if(typeof XLSX==="undefined"){alert("Per creare il backup Excel serve la libreria XLSX. Verifica la connessione internet e ricarica la pagina.");return;}
+  const c=config;
+  const rows=[];
+  for(const m of MASTER){
+    const d=(db||{})[m.id]||{}, vals=Array.isArray(d.checks)?d.checks:[], calc=calcObj(m);
+    const row={"SEDE TECNICA":m.id||"","DEFINIZIONE":m.definition||"","LOCALITA / TRATTA":m.localita||"","NUCLEO":m.nucleo||"","KM INIZIO":!kmMissing(d.kmI)?d.kmI:(!kmMissing(m.kmI)?m.kmI:""),"KM FINE":!kmMissing(d.kmF)?d.kmF:(!kmMissing(m.kmF)?m.kmF:""),"STATO":m.stato||"","CODICE":m.codice||"","VERIFICA SALVATA":d.saved?"SI":"NO","SISTEMA / TENSIONE":d.sistema||inferSystem(m,d),"AZIONAMENTO":d.azionamento||inferActuation(d,m)||"","TIPOLOGIA":d.tip||"","TIPO / CATEGORIA MANOVRA":d.argtipo||"","NUMERO / IDENTIFICAZIONE IN CAMPO":d.numsez||"","ULTERIORE ANOMALIA / DETTAGLIO OPERATORE":d.anom||"","INTERVENTO DA PROGRAMMARE / INTEGRAZIONE":d.prev||"","INTERVENTO ESEGUITO / NOTE":d.note||"","INDICE":calc.idx,"FASCIA":calc.fas,"PRIORITA":calc.pri,"DATA ULTIMO AGGIORNAMENTO":d.updated||"","DATA AGGIORNAMENTO KM":d.kmUpdated||""};
+    CHECKS.forEach((k,i)=>row["CHECK - "+k]=vals[i]||""); rows.push(row);
+  }
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(rows.length?rows:[{"SEDE TECNICA":""}]),"BACKUP_CENSIMENTO");
+  const dbChunks=[];for(const [id,obj] of Object.entries(db||{})){const txt=JSON.stringify(obj),size=30000,total=Math.max(1,Math.ceil(txt.length/size));for(let i=0;i<total;i++)dbChunks.push({"SEDE TECNICA":id,"CHUNK":i+1,"TOTALE CHUNK":total,"DATI JSON":txt.slice(i*size,(i+1)*size)});}XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(dbChunks.length?dbChunks:[{"SEDE TECNICA":"","CHUNK":"","TOTALE CHUNK":"","DATI JSON":""}]),"DATI_DB");
+  const pRows=personnel.map(p=>({"ID INTERNO":p.id||"","COGNOME":p.cognome||"","NOME":p.nome||"","QUALIFICA":p.qualifica||"","CID":p.cid||"","TELEFONO":p.telefono||"","EMAIL":p.email||"","NUCLEO":p.nucleo||"","ABILITATO PP":p.abilitatoPP===false?"NO":"SI","PREPOSTO EMERGENZE":p.preposto?"SI":"NO","ATTIVO":p.attivo===false?"NO":"SI"}));
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(pRows.length?pRows:[{"ID INTERNO":"","COGNOME":"","NOME":"","QUALIFICA":"","CID":"","TELEFONO":"","EMAIL":"","NUCLEO":"","ABILITATO PP":"","PREPOSTO EMERGENZE":"","ATTIVO":""}]),"PERSONALE");
+  const regRows=ppRegister.map(r=>({"NUMERO PP":r.number||"","GENERATO IL":r.generatedAt||"","PERIODO PROVA":r.period||"","ELEMENTI":Array.isArray(r.plants)?r.plants.join(" | "):"","RP":r.rp||"","CID RP":r.rpCid||"","NOME FILE":r.fileName||"","RIGENERABILE":r.payload?"SI":"NO"}));
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(regRows.length?regRows:[{"NUMERO PP":"","GENERATO IL":"","PERIODO PROVA":"","ELEMENTI":"","RP":"","CID RP":"","NOME FILE":"","RIGENERABILE":""}]),"REGISTRO_PP");
+  const dataRows=ppRegister.filter(r=>r.payload).map(r=>({"NUMERO PP":r.number||"","PAYLOAD JSON":JSON.stringify(r.payload)}));
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(dataRows.length?dataRows:[{"NUMERO PP":"","PAYLOAD JSON":""}]),"DATI_PP");
+  const info=[["CHIAVE","VALORE"],["TIPO FILE","BACKUP COMPLETO CENSIMENTO SEZIONATORI UMTE"],["VERSIONE BACKUP","5"],["DATA ESPORTAZIONE",new Date().toISOString()],["IDENTIFICATIVO UM",c.umId||""],["DESCRIZIONE / TERRITORIO",c.description||""],["NUCLEI",(c.nuclei||[]).join(" | ")],["NUMERO SEZIONATORI",MASTER.length],["NUMERO PERSONE",personnel.length],["NUMERO PP REGISTRATI",ppRegister.length],["ULTIMO PROGRESSIVO PP",ppLastProgressive||0],["NOTA SICUREZZA","Password amministratore e codice di recupero non inclusi nel backup"]];
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(info),"INFO_BACKUP");
+  const um=(c.umId||"UMTE").replace(/[^\w\-]+/g,"_"),dt=new Date(),stamp=dt.getFullYear()+String(dt.getMonth()+1).padStart(2,"0")+String(dt.getDate()).padStart(2,"0")+"_"+String(dt.getHours()).padStart(2,"0")+String(dt.getMinutes()).padStart(2,"0");
+  XLSX.writeFile(wb,"Backup_COMPLETO_Sezionatori_"+um+"_"+stamp+".xlsx");
+}
+
+async function restoreExcelBackup(){
+  if(!adminAuthenticated){alert("Accedi all'Amministrazione per ripristinare un backup.");return;}
+  const f=$("backupImportFile")?.files?.[0]; if(!f){alert("Seleziona il file Excel di backup da ripristinare.");return;}
+  if(typeof XLSX==="undefined"){alert("Per ripristinare il backup Excel serve la libreria XLSX.");return;}
+  let wb; try{wb=XLSX.read(await f.arrayBuffer(),{cellDates:true});}catch(e){alert("Il file selezionato non è un Excel valido.");return;}
+  const backupSheet=wb.SheetNames.find(n=>norm(n)==="BACKUP_CENSIMENTO"); if(!backupSheet){alert('Backup non riconosciuto: manca il foglio "BACKUP_CENSIMENTO".');return;}
+  const rows=XLSX.utils.sheet_to_json(wb.Sheets[backupSheet],{defval:"",raw:false}),restoredMaster=[],restoredDb={};
+  for(const r of rows){const id=String(r["SEDE TECNICA"]||"").trim();if(!id)continue;const m={id,definition:String(r["DEFINIZIONE"]||"").trim(),localita:String(r["LOCALITA / TRATTA"]||"").trim(),nucleo:String(r["NUCLEO"]||"").trim(),kmI:r["KM INIZIO"]||"",kmF:r["KM FINE"]||"",stato:String(r["STATO"]||"ESER").trim(),codice:String(r["CODICE"]||id.split("-")[0]||"").trim()};restoredMaster.push(m);const checks=CHECKS.map(k=>String(r["CHECK - "+k]||"").trim()),hasVerification=norm(r["VERIFICA SALVATA"])==="SI"||checks.some(v=>v)||String(r["ULTERIORE ANOMALIA / DETTAGLIO OPERATORE"]||"").trim()||String(r["INTERVENTO ESEGUITO / NOTE"]||"").trim();if(hasVerification){const kos=CHECKS.filter((k,i)=>checks[i]==="KO"),anom=String(r["ULTERIORE ANOMALIA / DETTAGLIO OPERATORE"]||""),idx=kos.reduce((sum,k)=>sum+(WEIGHTS[k]||0),0)+(anom.trim()?2:0);restoredDb[id]={saved:norm(r["VERIFICA SALVATA"])!=="NO",sistema:String(r["SISTEMA / TENSIONE"]||""),azionamento:String(r["AZIONAMENTO"]||""),tip:String(r["TIPOLOGIA"]||""),argtipo:String(r["TIPO / CATEGORIA MANOVRA"]||""),numsez:String(r["NUMERO / IDENTIFICAZIONE IN CAMPO"]||""),checks,anom,prev:String(r["INTERVENTO DA PROGRAMMARE / INTEGRAZIONE"]||""),note:String(r["INTERVENTO ESEGUITO / NOTE"]||""),index:idx,kmI:r["KM INIZIO"]||"",kmF:r["KM FINE"]||"",updated:String(r["DATA ULTIMO AGGIORNAMENTO"]||""),kmUpdated:String(r["DATA AGGIORNAMENTO KM"]||"")};}}
+  const dbSheet=wb.SheetNames.find(n=>norm(n)==="DATI_DB");if(dbSheet){const chunkRows=XLSX.utils.sheet_to_json(wb.Sheets[dbSheet],{defval:"",raw:false}),byId={};for(const r of chunkRows){const id=String(r["SEDE TECNICA"]||"").trim(),part=Number(r["CHUNK"]||0),txt=String(r["DATI JSON"]||"");if(!id||!part)continue;(byId[id]??=[]).push({part,txt});}for(const [id,parts] of Object.entries(byId)){try{const txt=parts.sort((a,b)=>a.part-b.part).map(x=>x.txt).join("");restoredDb[id]=JSON.parse(txt);}catch(e){console.warn("Dati completi non leggibili per",id,e);}}}
+  if(!restoredMaster.length){alert("Nel backup non sono presenti sedi tecniche valide.");return;}
+  let backupUM="",backupDesc="",backupNuclei=[],backupLastPP=0;const infoSheet=wb.SheetNames.find(n=>norm(n)==="INFO_BACKUP");if(infoSheet){const ir=XLSX.utils.sheet_to_json(wb.Sheets[infoSheet],{header:1,defval:""}),info={};ir.slice(1).forEach(r=>{if(r[0])info[norm(r[0])]=r[1]});backupUM=String(info["IDENTIFICATIVO UM"]||"").trim();backupDesc=String(info["DESCRIZIONE / TERRITORIO"]||"").trim();backupNuclei=String(info["NUCLEI"]||"").split("|").map(x=>x.trim()).filter(Boolean);backupLastPP=Number(info["ULTIMO PROGRESSIVO PP"]||0);}
+  if(!backupNuclei.length)backupNuclei=[...new Set(restoredMaster.map(x=>x.nucleo).filter(Boolean))];
+  let restoredPersonnel=[];const persSheet=wb.SheetNames.find(n=>norm(n)==="PERSONALE");if(persSheet){const pr=XLSX.utils.sheet_to_json(wb.Sheets[persSheet],{defval:"",raw:false});restoredPersonnel=pr.filter(r=>String(r["COGNOME"]||r["NOME"]||r["CID"]||"").trim()).map((r,i)=>({id:String(r["ID INTERNO"]||"").trim()||("P"+Date.now()+"_"+i),cognome:String(r["COGNOME"]||"").trim(),nome:String(r["NOME"]||"").trim(),qualifica:String(r["QUALIFICA"]||"").trim(),cid:String(r["CID"]||"").trim(),telefono:String(r["TELEFONO"]||"").trim(),email:String(r["EMAIL"]||"").trim(),nucleo:String(r["NUCLEO"]||"").trim(),abilitatoPP:norm(r["ABILITATO PP"]||r["PES"])!=="NO",preposto:norm(r["PREPOSTO EMERGENZE"])==="SI",attivo:norm(r["ATTIVO"])!=="NO"}));}
+  const payloadByNo={};const dataSheet=wb.SheetNames.find(n=>norm(n)==="DATI_PP");if(dataSheet){XLSX.utils.sheet_to_json(wb.Sheets[dataSheet],{defval:"",raw:false}).forEach(r=>{const no=String(r["NUMERO PP"]||"").trim(),txt=String(r["PAYLOAD JSON"]||"");if(no&&txt){try{payloadByNo[no]=JSON.parse(txt);}catch(e){console.warn("Payload PP non leggibile",no,e);}}});}
+  let restoredPP=[];const regSheet=wb.SheetNames.find(n=>norm(n)==="REGISTRO_PP");if(regSheet){restoredPP=XLSX.utils.sheet_to_json(wb.Sheets[regSheet],{defval:"",raw:false}).filter(r=>String(r["NUMERO PP"]||"").trim()).map(r=>{const number=String(r["NUMERO PP"]||"").trim();return{number,generatedAt:String(r["GENERATO IL"]||""),period:String(r["PERIODO PROVA"]||""),plants:String(r["ELEMENTI"]||"").split("|").map(x=>x.trim()).filter(Boolean),rp:String(r["RP"]||""),rpCid:String(r["CID RP"]||""),fileName:String(r["NOME FILE"]||""),payload:payloadByNo[number]||null};});}
+  if(!backupLastPP&&restoredPP.length)backupLastPP=Math.max(...restoredPP.map(r=>Number(r.number)||0));
+  const verified=Object.values(restoredDb).filter(x=>x.saved).length,regen=restoredPP.filter(r=>r.payload).length;
+  if(!confirm(`Ripristinare questo backup completo?\n\nSezionatori: ${restoredMaster.length}\nVerifiche: ${verified}\nPersone: ${restoredPersonnel.length}\nPP registrati: ${restoredPP.length}\nPP rigenerabili: ${regen}\nUltimo progressivo PP: ${backupLastPP}\n\nI dati correnti verranno sostituiti. Password e codice di recupero resteranno invariati.`))return;
+  if(!confirm("CONFERMA RIPRISTINO COMPLETO: censimento, personale e archivio PP correnti verranno sostituiti."))return;
+  MASTER=restoredMaster;db=restoredDb;personnel=restoredPersonnel;ppRegister=restoredPP;ppLastProgressive=backupLastPP;if(backupUM)config.umId=backupUM;if(backupDesc)config.description=backupDesc;if(backupNuclei.length)config.nuclei=backupNuclei;await persistAll(true);renderNuclei();renderAdminPlants();renderPersonnel();refreshConfigUI();renderDash();renderList();renderPPRegister();if($("ppNumber"))$("ppNumber").value=String(ppLastProgressive+1);$("backupImportFile").value="";alert(`Backup completo ripristinato.\nSezionatori: ${MASTER.length}\nPersonale: ${personnel.length}\nPP: ${ppRegister.length} (${regen} rigenerabili)\nProssimo PP: ${ppLastProgressive+1}`);
+}
+</script>
+<script>
+
+let archiveDirHandle=null;
+let ppRegister=JSON.parse(localStorage.getItem("sezPPRegister_TEST_PULITO")||"[]");
+let ppLastProgressive=Number(localStorage.getItem("sezPPLastProgressive_TEST_PULITO")||0);
+const ARCHIVE_DB_NAME="UMTE_Sezionatori_Archive";
+const ARCHIVE_STORE="handles";
+const ARCHIVE_KEY="archiveDir";
+const ARCHIVE_FILE="UMTE_Manager_Sezionatori_dati.json";
+
+function openArchiveDB(){
+  return new Promise((resolve,reject)=>{
+    const req=indexedDB.open(ARCHIVE_DB_NAME,1);
+    req.onupgradeneeded=()=>{ if(!req.result.objectStoreNames.contains(ARCHIVE_STORE)) req.result.createObjectStore(ARCHIVE_STORE); };
+    req.onsuccess=()=>resolve(req.result);
+    req.onerror=()=>reject(req.error);
+  });
+}
+async function saveArchiveHandle(handle){
+  const idb=await openArchiveDB();
+  return new Promise((resolve,reject)=>{
+    const tx=idb.transaction(ARCHIVE_STORE,"readwrite");
+    tx.objectStore(ARCHIVE_STORE).put(handle,ARCHIVE_KEY);
+    tx.oncomplete=()=>resolve();
+    tx.onerror=()=>reject(tx.error);
+  });
+}
+async function loadArchiveHandle(){
+  const idb=await openArchiveDB();
+  return new Promise((resolve,reject)=>{
+    const tx=idb.transaction(ARCHIVE_STORE,"readonly");
+    const req=tx.objectStore(ARCHIVE_STORE).get(ARCHIVE_KEY);
+    req.onsuccess=()=>resolve(req.result||null);
+    req.onerror=()=>reject(req.error);
+  });
+}
+async function saveNamedHandle(key,handle){
+  const idb=await openArchiveDB();
+  return new Promise((resolve,reject)=>{const tx=idb.transaction(ARCHIVE_STORE,"readwrite");tx.objectStore(ARCHIVE_STORE).put(handle,key);tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error);});
+}
+async function loadNamedHandle(key){
+  const idb=await openArchiveDB();
+  return new Promise((resolve,reject)=>{const tx=idb.transaction(ARCHIVE_STORE,"readonly");const req=tx.objectStore(ARCHIVE_STORE).get(key);req.onsuccess=()=>resolve(req.result||null);req.onerror=()=>reject(req.error);});
+}
+async function ensurePermission(handle,mode="readwrite"){
+  if(!handle) return false;
+  const opts={mode};
+  if((await handle.queryPermission(opts))==="granted") return true;
+  return (await handle.requestPermission(opts))==="granted";
+}
+function setArchiveUI(mode="boot",message=""){
+ const g=document.getElementById("archiveGate");if(g)g.style.display="none";
+ const c=document.getElementById("archiveChip");if(!c)return;
+ c.classList.remove("off","sync-online","sync-offline","sync-error");
+ if(mode==="online"){c.textContent=message||"ONLINE · SINCRONIZZATO";c.classList.add("sync-online");}
+ else if(mode==="offline"){c.textContent=message||"OFFLINE · DATI LOCALI";c.classList.add("sync-offline");}
+ else if(mode==="error"){c.textContent=message||"ERRORE SINCRONIZZAZIONE";c.classList.add("sync-error");}
+ else {c.textContent=message||"CONNESSIONE...";c.classList.add("off");}
+}
+async function connectArchive(){return initCloudApp();}
+
+const CLOUD_DOCS_TABLE="umte_docs", CLOUD_PLANTS_TABLE="umte_plant_state";
+const CLOUD_SESSION_KEY="umteCloudSessionV1", CLOUD_OUTBOX_KEY="umteCloudOutboxV1";
+let cloudSession=null, cloudLoading=false;
+let currentUserRole="", currentUserProfile=null;
+function cloudCfg(){return window.UMTE_CLOUD_CONFIG||{};}
+function cloudConfigured(){const c=cloudCfg();return /^https:\/\//i.test(String(c.url||""))&&String(c.key||"").length>20;}
+function cloudBase(){return String(cloudCfg().url||"").replace(/\/$/,"");}
+function cloudWorkspace(){return cloudCfg().workspace||"UMTE1_GALLARATE";}
+function saveCloudSession(s){cloudSession=s||null;if(s)localStorage.setItem(CLOUD_SESSION_KEY,JSON.stringify(s));else localStorage.removeItem(CLOUD_SESSION_KEY);}
+function loadCloudSession(){try{return JSON.parse(localStorage.getItem(CLOUD_SESSION_KEY)||"null")}catch(e){return null}}
+function showCloudLogin(msg="",err=false){const x=$("cloudLogin");if(x)x.classList.remove("hidden");const m=$("cloudLoginMsg");if(m&&msg){m.textContent=msg;m.classList.toggle("err",!!err);m.classList.toggle("ok",!err);}const w=$("cloudConfigWarning");if(w)w.classList.toggle("hidden",cloudConfigured());}
+function hideCloudLogin(){const x=$("cloudLogin");if(x)x.classList.add("hidden");}
+function updateCloudUser(){const u=cloudSession?.user;const el=$("cloudUserEmail");if(el)el.textContent=(currentUserProfile?.full_name?currentUserProfile.full_name+" · ":"")+(u?.email||"");updateRoleUI();}
+
+async function loadCurrentUserProfile(){
+  const uid=cloudSession?.user?.id;
+  if(!uid)throw new Error("LOGIN_REQUIRED");
+  const r=await cloudFetch(`/rest/v1/umte_profiles?select=user_id,role,email,full_name,nucleo&user_id=eq.${encodeURIComponent(uid)}`);
+  const arr=await r.json();
+  if(!Array.isArray(arr)||!arr.length)throw new Error("UTENTE_NON_AUTORIZZATO");
+  currentUserProfile=arr[0];
+  currentUserRole=currentUserProfile.role||"operator";
+  adminAuthenticated=currentUserRole==="admin";
+  updateRoleUI();
+  return currentUserProfile;
+}
+function updateRoleUI(){
+  const isAdmin=currentUserRole==="admin";
+  document.body?.classList.toggle("role-admin",isAdmin);
+  ["mobileAdminBtn","topAdminBtn"].forEach(id=>{
+    const el=$(id);
+    if(el)el.setAttribute("aria-hidden",isAdmin?"false":"true");
+  });
+}
+async function cloudFirstAccess(){
+  if(!cloudConfigured()){showCloudLogin("Configurazione cloud non disponibile.",true);return;}
+  const email=($("cloudEmail")?.value||"").trim().toLowerCase();
+  const cid=$("cloudPassword")?.value||"";
+  if(!/^[a-z0-9._%+\-]+@rfi\.it$/i.test(email)){showCloudLogin("Inserisci la tua mail RFI valida.",true);return;}
+  if(!/^\d{6}$/.test(cid)){showCloudLogin("Al primo accesso usa il tuo CID di 6 cifre come password.",true);return;}
+  try{
+    showCloudLogin("Registrazione in corso...");
+    const s=await authFetch("/auth/v1/signup",{email,password:cid});
+    if(s?.access_token){
+      s.expires_at=Math.floor(Date.now()/1000)+Number(s.expires_in||3600);
+      saveCloudSession(s);
+      updateCloudUser();
+      hideCloudLogin();
+      await loadCloudData(true);
+    }else{
+      showCloudLogin("Account creato. Controlla la mail RFI e conferma l’indirizzo, poi torna qui e premi ACCEDI.");
+    }
+  }catch(e){
+    const msg=String(e.message||e);
+    const wait=msg.match(/after\s+(\d+)\s+seconds?/i);
+    if(wait)showCloudLogin(`Richiesta già effettuata. Attendi ${wait[1]} secondi prima di riprovare. Controlla anche la mail RFI: la conferma potrebbe essere già stata inviata.`,false);
+    else if(/already|registered|exists/i.test(msg))showCloudLogin("Account già creato: usa ACCEDI con mail RFI e password.",true);
+    else showCloudLogin(msg,true);
+  }
+}
+
+async function authFetch(path,body){const r=await fetch(cloudBase()+path,{method:"POST",headers:{"apikey":cloudCfg().key,"Content-Type":"application/json"},body:JSON.stringify(body)});let data={};try{data=await r.json()}catch(e){}if(!r.ok)throw new Error(data?.msg||data?.error_description||data?.error||"Autenticazione non riuscita");return data;}
+async function cloudLogin(){if(!cloudConfigured()){showCloudLogin("Configura prima URL e Publishable key in config.js.",true);return;}const email=$("cloudEmail")?.value.trim(),password=$("cloudPassword")?.value||"";if(!email||!password){showCloudLogin("Inserisci email e password.",true);return;}try{showCloudLogin("Accesso in corso...");const s=await authFetch("/auth/v1/token?grant_type=password",{email,password});s.expires_at=Math.floor(Date.now()/1000)+Number(s.expires_in||3600);saveCloudSession(s);updateCloudUser();hideCloudLogin();await loadCloudData(true);}catch(e){showCloudLogin(e.message||String(e),true)}}
+async function cloudLogout(){try{if(cloudSession?.access_token)await fetch(cloudBase()+"/auth/v1/logout",{method:"POST",headers:{apikey:cloudCfg().key,Authorization:"Bearer "+cloudSession.access_token}})}catch(e){}saveCloudSession(null);try{localStorage.removeItem("sezRegistry_TEST_PULITO");localStorage.removeItem("sezDB_TEST_PULITO");}catch(e){}MASTER=[];db={};currentUserRole="";currentUserProfile=null;adminAuthenticated=false;updateCloudUser();showCloudLogin("Sessione chiusa.");setArchiveUI("boot","ACCESSO RICHIESTO");}
+async function ensureCloudSession(){if(!cloudSession)cloudSession=loadCloudSession();if(!cloudSession)throw new Error("LOGIN_REQUIRED");const now=Math.floor(Date.now()/1000);if(Number(cloudSession.expires_at||0)>now+90)return cloudSession;if(!cloudSession.refresh_token)throw new Error("LOGIN_REQUIRED");const s=await authFetch("/auth/v1/token?grant_type=refresh_token",{refresh_token:cloudSession.refresh_token});s.expires_at=Math.floor(Date.now()/1000)+Number(s.expires_in||3600);saveCloudSession(s);updateCloudUser();return s;}
+async function cloudFetch(path,opts={},retry=true){const s=await ensureCloudSession();const h={apikey:cloudCfg().key,Authorization:"Bearer "+s.access_token,...(opts.headers||{})};const r=await fetch(cloudBase()+path,{...opts,headers:h});if(r.status===401&&retry){cloudSession.expires_at=0;saveCloudSession(cloudSession);await ensureCloudSession();return cloudFetch(path,opts,false);}if(!r.ok){let t="";try{t=await r.text()}catch(e){}throw new Error(`Cloud ${r.status}: ${t||r.statusText}`)}return r;}
+function cloudQueue(op){let q=[];try{q=JSON.parse(localStorage.getItem(CLOUD_OUTBOX_KEY)||"[]")}catch(e){}const id=op.type+":"+(op.key||op.plant_id||"");q=q.filter(x=>(x.type+":"+(x.key||x.plant_id||""))!==id);q.push({...op,queuedAt:new Date().toISOString()});localStorage.setItem(CLOUD_OUTBOX_KEY,JSON.stringify(q));setArchiveUI("offline","DA SINCRONIZZARE");}
+async function cloudUpsertDoc(kind,key,payload,queueOnFail=true){try{await cloudFetch(`/rest/v1/${CLOUD_DOCS_TABLE}?on_conflict=kind,key`,{method:"POST",headers:{"Content-Type":"application/json","Prefer":"resolution=merge-duplicates,return=minimal"},body:JSON.stringify([{kind,key,payload,updated_at:new Date().toISOString()}])});return true}catch(e){if(queueOnFail){cloudQueue({type:"doc",kind,key,payload});return false}throw e}}
+async function cloudUpsertPlant(plant_id,payload,queueOnFail=true){try{await cloudFetch(`/rest/v1/${CLOUD_PLANTS_TABLE}?on_conflict=plant_id`,{method:"POST",headers:{"Content-Type":"application/json","Prefer":"resolution=merge-duplicates,return=minimal"},body:JSON.stringify([{plant_id,payload,updated_at:new Date().toISOString()}])});return true}catch(e){if(queueOnFail){cloudQueue({type:"plant",plant_id,payload});return false}throw e}}
+async function cloudDeletePlant(plant_id){try{await cloudFetch(`/rest/v1/${CLOUD_PLANTS_TABLE}?plant_id=eq.${encodeURIComponent(plant_id)}`,{method:"DELETE"});return true}catch(e){cloudQueue({type:"deletePlant",plant_id});return false}}
+async function flushCloudOutbox(){let q=[];try{q=JSON.parse(localStorage.getItem(CLOUD_OUTBOX_KEY)||"[]")}catch(e){}if(!q.length)return true;let remain=[];for(const op of q){try{if(op.type==="doc")await cloudUpsertDoc(op.kind,op.key,op.payload,false);else if(op.type==="plant")await cloudUpsertPlant(op.plant_id,op.payload,false);else if(op.type==="deletePlant")await cloudDeletePlant(op.plant_id);}catch(e){remain.push(op)}}localStorage.setItem(CLOUD_OUTBOX_KEY,JSON.stringify(remain));if(remain.length)setArchiveUI("offline",`${remain.length} DA SINCRONIZZARE`);return !remain.length;}
+function cacheAllLocal(){localStorage.setItem("sezDB_TEST_PULITO",JSON.stringify(db));localStorage.setItem("sezConfig_TEST_PULITO",JSON.stringify(config));localStorage.setItem("sezPersonnel_TEST_PULITO",JSON.stringify(personnel));localStorage.setItem("sezRegistry_TEST_PULITO",JSON.stringify(MASTER));localStorage.setItem("sezPPRegister_TEST_PULITO",JSON.stringify(ppRegister));localStorage.setItem("sezPPLastProgressive_TEST_PULITO",String(ppLastProgressive||0));}
+async function cloudSaveGlobals(){cacheAllLocal();const pp={register:ppRegister,lastProgressive:Number(ppLastProgressive||0)};const ok=await Promise.all([cloudUpsertDoc("registry","main",MASTER),cloudUpsertDoc("config","main",config),cloudUpsertDoc("personnel","main",personnel),cloudUpsertDoc("pp","main",pp)]);if(ok.every(Boolean))setArchiveUI("online");return ok.every(Boolean);}
+async function syncAllPlantStates(){const entries=Object.entries(db||{});for(let i=0;i<entries.length;i+=30){await Promise.all(entries.slice(i,i+30).map(([id,p])=>cloudUpsertPlant(id,p)));}return true;}
+async function loadCloudData(force=false){if(cloudLoading)return;cloudLoading=true;setArchiveUI("boot","SINCRONIZZAZIONE...");try{await ensureCloudSession();await loadCurrentUserProfile();await flushCloudOutbox();const [dr,pr]=await Promise.all([cloudFetch(`/rest/v1/${CLOUD_DOCS_TABLE}?select=kind,key,payload`),cloudFetch(`/rest/v1/${CLOUD_PLANTS_TABLE}?select=plant_id,payload`)]);const docs=await dr.json(),plants=await pr.json(),dm={};docs.forEach(x=>dm[x.kind+":"+x.key]=x.payload);if(dm["registry:main"]&&Array.isArray(dm["registry:main"])&&dm["registry:main"].length)MASTER=dm["registry:main"];else throw new Error("ANAGRAFICA_NON_CONFIGURATA");if(dm["config:main"])config={...defaultConfig(),...dm["config:main"]};if(dm["personnel:main"]&&Array.isArray(dm["personnel:main"]))personnel=dm["personnel:main"];if(dm["pp:main"]){ppRegister=Array.isArray(dm["pp:main"].register)?dm["pp:main"].register:[];ppLastProgressive=Number(dm["pp:main"].lastProgressive||0);}if(plants.length){db={};plants.forEach(x=>db[x.plant_id]=x.payload||{});}cacheAllLocal();hideCloudLogin();updateCloudUser();setArchiveUI("online");refreshConfigUI();renderDash();renderList();renderCritical();renderPPRegister?.();if(isMobileMaintenanceMode())show("plants");if(!config.umId)$("setupGate")?.classList.remove("hidden");}catch(e){console.error(e);if(String(e.message)==="LOGIN_REQUIRED"){showCloudLogin("Accedi per caricare l'archivio centrale.");setArchiveUI("boot","ACCESSO RICHIESTO");}
+else if(String(e.message)==="UTENTE_NON_AUTORIZZATO"){saveCloudSession(null);currentUserRole="";currentUserProfile=null;adminAuthenticated=false;updateRoleUI();showCloudLogin("Utente non autorizzato per UMTE1 Gallarate.",true);setArchiveUI("boot","ACCESSO NEGATO");}
+else{const hasCache=Array.isArray(MASTER)&&MASTER.length;if(hasCache){hideCloudLogin();setArchiveUI("error","ERRORE APP · DATI LOCALI");try{refreshConfigUI();renderDash();renderList();renderCritical();if(isMobileMaintenanceMode())show("plants");}catch(uiErr){console.error(uiErr);}appToast("Errore applicazione: "+(e.message||e),"err",6000);}else showCloudLogin(String(e.message)==="ANAGRAFICA_NON_CONFIGURATA"?"Anagrafica centrale non ancora caricata. Esegui SUPABASE_SETUP.sql.":"Archivio non raggiungibile: "+(e.message||e),true);}}finally{cloudLoading=false}}
+async function initCloudApp(){if(!cloudConfigured()){showCloudLogin("Configura URL e Publishable key in config.js prima di pubblicare.",true);setArchiveUI("error","CONFIGURAZIONE MANCANTE");return;}cloudSession=loadCloudSession();updateCloudUser();if(!cloudSession){showCloudLogin();setArchiveUI("boot","ACCESSO RICHIESTO");return;}await loadCloudData();}
+async function loadSharedData(){return loadCloudData();}
+async function writeSharedData(){cacheAllLocal();if(!cloudSession)return true;if(current?.id&&db[current.id]){const ok=await cloudUpsertPlant(current.id,db[current.id]);if(ok)setArchiveUI("online");return ok;}return cloudSaveGlobals();}
+window.addEventListener("online",()=>{if(cloudSession)loadCloudData(true)});window.addEventListener("offline",()=>setArchiveUI("offline","OFFLINE · DATI LOCALI"));
+
+let MASTER=[];
+
+const TE_DOCS=[
+ {code:"SCS23700 1 TE",title:"Manutenzione sezionatore 3 kV manuale — altri binari",file:"MOL SCS23700 1 TE.pdf",group:"MOL"},
+ {code:"SCS23700 2 TE",title:"Manutenzione sezionatore 3 kV manuale — binari di corsa",file:"MOL SCS23700 2 TE.pdf",group:"MOL"},
+ {code:"SCS23700 3 TE",title:"Manutenzione sezionatore 3 kV con manovra elettrica — binari di corsa",file:"MOL SCS23700 3 TE.pdf",group:"MOL"},
+ {code:"SCS23700 4 TE",title:"Manutenzione sezionatore 3 kV con manovra elettrica — altri binari",file:"MOL SCS23700 4 TE.pdf",group:"MOL"},
+ {code:"IEITE",title:"Istruzione per l’esercizio degli impianti di trazione elettrica — rev. 2022",file:"IEITE_rev_2022_epod.pdf",group:"NORMATIVA"},
+ {code:"SL03",title:"RFI DTC P SL 03 1 0",file:"RFI DTC P SL 03 1 0.pdf",group:"PROCEDURA"},
+ {code:"SL03-GUIDA",title:"Guida integrativa P SL 03 1 0",file:"Guida integrativa P SL 03 1 0.pdf",group:"GUIDA"}
+];
+function docsForPlant(x){
+ if(!x)return TE_DOCS.map(d=>d.code);
+ const d=state(x),t=((x.definition||"")+" "+(d.tip||"")+" "+(d.argtipo||"")+" "+(d.azionamento||"")).toUpperCase();
+ const base=["IEITE","SL03","SL03-GUIDA"];
+ if(t.includes("ELETTR")||t.includes("MOTOR")||t.includes("IMS"))return ["SCS23700 3 TE","SCS23700 4 TE",...base];
+ return ["SCS23700 1 TE","SCS23700 2 TE",...base];
+}
+function renderDocsFiltered(codes,activeCode){
+ const list=$("docsList");const docs=TE_DOCS.filter(d=>!codes||codes.includes(d.code));
+ list.innerHTML=docs.map(d=>`<div class="doc-card ${activeCode===d.code?'active':''}" onclick="viewDoc(${TE_DOCS.indexOf(d)},this)"><span class="doc-badge">${d.group}</span><b>${d.code}</b><small>${d.title}</small><button class="doc-open-btn" type="button" onclick="event.stopPropagation();openPrivateDoc(TE_DOCS[${TE_DOCS.indexOf(d)}].file)">APRI PDF</button></div>`).join("")||'<div class="admin-note">Nessun riferimento individuato.</div>';
+ if(docs.length){const d=docs.find(x=>x.code===activeCode)||docs[0];viewDoc(TE_DOCS.indexOf(d),list.querySelector('.doc-card'));}
+}
+function openDocs(code){const ov=$("docsOverlay");if(!ov)return;ov.classList.remove("hidden");const dl=$("docPlantOptions");if(dl)dl.innerHTML=MASTER.filter(x=>norm(x.stato)!=="DISATTIVATO").map(x=>`<option value="${esc(x.id)}">${esc(x.localita||"")} - ${esc(x.definition||"")}</option>`).join("");const info=$("docPlantInfo");if(info)info.innerHTML=`<b>${TE_DOCS.length} documenti disponibili</b><br>Se non selezioni un impianto vengono mostrati tutti i riferimenti TE.`;renderDocsFiltered(null,code);}
+function filterDocsByPlant(){const q=norm($("docPlantSearch")?.value||"");if(!q){$("docPlantInfo").textContent="Se non selezioni un impianto vengono mostrati tutti i documenti TE.";renderDocsFiltered(null);return;}const x=MASTER.find(x=>norm(x.id)===q)||MASTER.find(x=>norm([x.id,x.localita,x.definition].join(" ")).includes(q));if(!x){$("docPlantInfo").textContent="Seleziona un sezionatore dall’elenco per filtrare i riferimenti.";return;}const codes=docsForPlant(x);$("docPlantInfo").innerHTML=`<b>${esc(x.id)}</b> — ${esc(x.localita||x.definition||"")}<br>Riferimenti previsti: ${codes.map(esc).join(" · ")}`;renderDocsFiltered(codes);}
+function closeDocs(){$("docsOverlay")?.classList.add("hidden");const f=$("docFrame");if(f)f.src="about:blank";}
+async function viewDoc(i,el){document.querySelectorAll(".doc-card").forEach(x=>x.classList.remove("active"));if(el)el.classList.add("active");const d=TE_DOCS[i];try{$("docFrame").src=(await privateDocUrl(d.file))+"#view=FitH";}catch(e){$("docFrame").src="about:blank";appToast("Documento non disponibile: "+(e.message||e),"err",5200);}}
+function docsForCurrent(){return docsForPlant(current);}
+
+async function privateDocUrl(file){
+  const safe=String(file||"").split("/").map(encodeURIComponent).join("/");
+  const r=await cloudFetch(`/storage/v1/object/sign/umte-docs/${safe}`,{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({expiresIn:3600})
+  });
+  const d=await r.json();
+  const u=d.signedURL||d.signedUrl||d.url;
+  if(!u)throw new Error("Impossibile generare il collegamento al documento.");
+  if(/^https?:\/\//i.test(u))return u;
+  if(u.startsWith("/storage/v1/"))return cloudBase()+u;
+  if(u.startsWith("/object/"))return cloudBase()+"/storage/v1"+u;
+  return cloudBase()+"/storage/v1/"+u.replace(/^\/+/,"");
+}
+async function openPrivateDoc(file){
+  try{
+    const u=await privateDocUrl(file);
+    window.open(u,"_blank","noopener");
+  }catch(e){
+    appToast("Documento non disponibile: "+(e.message||e),"err",5200);
+  }
+}
+
+
+
+const ODL_SCHEDULES={"LO2260-CS":[{"md":"04-29","type":"ELETTRICA","odl":"76666855","text":"Manut. Sez. 3KV man. elettr. bin corsa","nums":[]}],"LO2250-CS":[{"md":"04-28","type":"ELETTRICA","odl":"76667324","text":"Manut. Sez. 3kV man. elettr. bin corsa","nums":[]},{"md":"10-27","type":"ELETTRICA","odl":"77011693","text":"Manut. Sez. 3kV man. elettr. bin corsa","nums":[]}],"LO1393-CS":[{"md":"04-01","type":"MANUALE","odl":"76666704","text":"Manut. Sez. 3KV manuale altri bin/SSE","nums":[]},{"md":"06-20","type":"MANUALE","odl":"76734482","text":"Manut. Sez. 3KV manuale bin. corsa","nums":[]}],"LO2033-CS":[{"md":"02-03","type":"MANUALE","odl":"76666713","text":"Manut. Sez. 3KV manuale altri bin/SSE","nums":[]},{"md":"04-29","type":"MANUALE","odl":"76666785","text":"Manut. Sez. 3KV manuale bin. corsa","nums":[]},{"md":"04-29","type":"ELETTRICA","odl":"76666786","text":"Manut. Sez. 3KV man. elettr. bin corsa","nums":[]}],"LO2757-CS":[{"md":"01-13","type":"ELETTRICA","odl":"76666915","text":"SOMMA L Manut. Sez. 3KV man. elet. 22-33","nums":["22","33"]},{"md":"04-29","type":"ELETTRICA","odl":"76666969","text":"SOMMA L. Manut. Sez. 3KV man. elettr. BC","nums":[]},{"md":"07-14","type":"ELETTRICA","odl":"76734613","text":"SOMMA L Manut. Sez. 3KV man. elet. 22-33","nums":["22","33"]}],"LO1853-CS":[{"md":"04-29","type":"ELETTRICA","odl":"76666853","text":"Manut. Sez. 3KV man. elettr. bin corsa","nums":[]}],"LO2713-CS":[{"md":"03-19","type":"ELETTRICA","odl":"76666908","text":"SESTO Manut. Sez. 3KV man. elet. 33-14","nums":["33","14"]},{"md":"04-29","type":"","odl":"76666963","text":"SESTO C. Manut. Sez. 3KV 3-4-9-10-11-116","nums":["4","9","10","11","116"]},{"md":"04-29","type":"ELETTRICA","odl":"76666964","text":"SESTO C. Manut. Sez. 3KV man. elettr. BC","nums":[]},{"md":"09-19","type":"ELETTRICA","odl":"76734609","text":"SESTO Manut. Sez. 3KV man. elet. 33-14","nums":["33","14"]},{"md":"10-29","type":"ELETTRICA","odl":"77011375","text":"SESTO C. Manut. Sez. 3KV man. elettr. BC","nums":[]}],"LO0461-CS":[{"md":"01-07","type":"","odl":"76666951","text":"ARONA Manut. Sez. 3KV 1-2-12-13-24","nums":["1","2","12","13","24"]},{"md":"02-28","type":"","odl":"76666900","text":"ARONA Manut. Sez. 3KV  22-42-50-33","nums":["22","42","50","33"]},{"md":"04-29","type":"","odl":"76666950","text":"ARONA Man. Sez. 3KV 103-104-109-110-116","nums":["103","104","109","110","116"]},{"md":"08-28","type":"","odl":"76734600","text":"ARONA Manut. Sez. 3KV  22-42-50-33","nums":["22","42","50","33"]}],"LO0766-CS":[{"md":"04-29","type":"ELETTRICA","odl":"76666777","text":"Manut. Sez. 3KV man. elettr. bin corsa","nums":[]},{"md":"05-02","type":"MANUALE","odl":"76734380","text":"Manut. Sez. 3KV manuale altri bin/SSE","nums":[]},{"md":"10-29","type":"ELETTRICA","odl":"77011187","text":"Manut. Sez. 3KV man. elettr. bin corsa","nums":[]}],"LO1554-CS":[{"md":"04-29","type":"MANUALE","odl":"76666781","text":"Manut. Sez. 3KV manuale bin. corsa","nums":[]},{"md":"04-29","type":"ELETTRICA","odl":"76666782","text":"Manut. Sez. 3KV man. elettr. bin corsa","nums":[]},{"md":"10-29","type":"ELETTRICA","odl":"77011200","text":"Manut. Sez. 3KV man. elettr. bin corsa","nums":[]}],"LO1505-CS":[{"md":"04-29","type":"ELETTRICA","odl":"76666845","text":"Manut. Sez. 3KV man. elettr. 1 - 2","nums":["1","2"]},{"md":"10-29","type":"ELETTRICA","odl":"77011302","text":"Manut. Sez. 3KV man. elettr. 1 - 2","nums":["1","2"]}],"LO1254-CS":[{"md":"03-03","type":"ELETTRICA","odl":"76666998","text":"DOMO 2 Manut. Sez. 3KV man. elet. AB","nums":[]},{"md":"04-29","type":"ELETTRICA","odl":"76667042","text":"DOMO 2 Manut. Sez. 3KV man. elettr. BC","nums":[]}],"LO1259-CS":[{"md":"04-22","type":"","odl":"76666960","text":"DORMELLETTO Manut. Sez.  bin corsa","nums":[]}],"LO2994-CS":[{"md":"04-29","type":"ELETTRICA","odl":"76666792","text":"Manut. Sez. 3KV man. elettr. bin corsa","nums":[]},{"md":"10-29","type":"ELETTRICA","odl":"77011208","text":"Manut. Sez. 3KV man. elettr. bin corsa","nums":[]}],"LO2833-CS":[{"md":"05-26","type":"ELETTRICA","odl":"76734577","text":"Manut. Sez. 3kV man. elettr. bin corsa","nums":[]},{"md":"05-26","type":"MANUALE","odl":"76734578","text":"Manut. Sez. 3KV manuale bin. corsa","nums":[]}],"LO1253-CS":[{"md":"05-29","type":"ELETTRICA","odl":"76734770","text":"DOMO Manut. Sez. 3KV man. elettr. BC","nums":[]},{"md":"07-21","type":"MANUALE","odl":"76734683","text":"DOMO Manut. Sez. 3KV manuale","nums":[]}],"LO0948-CS":[{"md":"06-20","type":"","odl":"76734479","text":"CASORATE Manut. Sez. 3KV man. bin. corsa","nums":[]}],"LO0636-CS":[{"md":"04-29","type":"ELETTRICA","odl":"76666843","text":"Manut. Sez. 3KV man. elettr. bin corsa","nums":[]}],"LO3018-CS":[{"md":"04-29","type":"","odl":"76666973","text":"VERGIATE Manut. Sez. 3KV 13 - 24","nums":["13","24"]}],"LO3177-CS":[{"md":"04-28","type":"ELETTRICA","odl":"76667326","text":"Manut. Sez. 3kV man. elettr. bin corsa","nums":[]},{"md":"04-28","type":"MANUALE","odl":"76667327","text":"Manut. Sez. 3kV manuale bin. corsa","nums":[]}],"LO3178-CS":[{"md":"04-28","type":"ELETTRICA","odl":"76667333","text":"Manut. Sez. 3kV man. elettr. bin corsa","nums":[]},{"md":"08-06","type":"ELETTRICA","odl":"77011701","text":"Manut. Sez. 3kV man. elettr. bin corsa","nums":[]}],"LO0546-CS":[{"md":"05-29","type":"ELETTRICA","odl":"76734755","text":"B°TOCE Manut. Sez. 3KV man. elettr.","nums":[]}],"LO1542-CS":[{"md":"05-26","type":"ELETTRICA","odl":"76735241","text":"Manut. Sez. 3kV man. elettr. bin corsa","nums":[]},{"md":"11-25","type":"ELETTRICA","odl":"77011692","text":"Manut. Sez. 3kV man. elettr. bin corsa","nums":[]}],"LO8063-CS":[{"md":"06-20","type":"MANUALE","odl":"76734579","text":"Manut. Sez. 3KV manuale bin. corsa","nums":[]}],"LO2793-CS":[{"md":"04-29","type":"ELETTRICA","odl":"76666972","text":"STRESA Manut. Sez. 3KV man. elettr.","nums":[]}],"LO0405-CS":[{"md":"04-29","type":"ELETTRICA","odl":"76666774","text":"Manut. Sez. 3KV man. elettr. bin corsa","nums":[]}],"LO3012-CS":[{"md":"05-29","type":"MANUALE","odl":"76734657","text":"VERBANIA Manut. Sez. 3KV man. manuali","nums":[]}],"LO2290-CS":[{"md":"05-29","type":"","odl":"76734779","text":"PREMOSELLO Manut. Sez. 103-104","nums":["103","104"]},{"md":"05-29","type":"","odl":"76734780","text":"PREMOSELLO Manut. Sez. 1-2-13-24-11-42","nums":["1","2","13","24","11","42"]}],"LO2987-CS":[{"md":"04-29","type":"MANUALE","odl":"76666790","text":"Manut. Sez. 3KV manuale bin. corsa","nums":[]}],"LO1593-CS":[{"md":"05-26","type":"MANUALE","odl":"76735242","text":"Manut. Sez. 3kV manuale bin. corsa","nums":[]}]};
+function plantNumber(x){const m=String(x.definition||"").match(/(?:N[°º]?\s*)?(\d{1,3})\s*$/i);return m?String(parseInt(m[1],10)):"";}
+function plantODLs(x){const base=(String(x.id||"").match(/LO\d{4}-CS/i)||[String(x.codice||"")+"-CS"])[0].toUpperCase(), n=plantNumber(x);return (ODL_SCHEDULES[base]||[]).filter(o=>!o.nums?.length||o.nums.includes(n));}
+function lastVerificationISO(x){
+ const d=state(x);let dates=[];if(d.updated)dates.push(d.updated);
+ if(Array.isArray(d.history))d.history.forEach(h=>{if(h.updated)dates.push(h.updated);if(h.date)dates.push(h.date)});
+ return dates.sort().pop()||"";
+}
+function localISODate(d){if(!d||Number.isNaN(d.getTime()))return "";return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;}
+function cardineKey(d){return localISODate(d)}
+function scheduleCandidates(x,fromYear,toYear){
+ const out=[];for(let y=fromYear;y<=toYear;y++)for(const o of plantODLs(x)){let [m,d]=o.md.split("-").map(Number);out.push({date:new Date(y,m-1,d,12),odl:o.odl,type:o.type,text:o.text,md:o.md});}
+ return out.sort((a,b)=>a.date-b.date);
+}
+function completedCardines(x){
+ const d=state(x);if(Array.isArray(d.completedCardines)&&d.completedCardines.length)return new Set(d.completedCardines);
+ const done=new Set();if(!plantODLs(x).length)return done;let vd=[];
+ if(Array.isArray(d.history))d.history.forEach(h=>{let v=h.updated||h.date;if(v)vd.push(new Date(v))});
+ if(d.saved&&d.updated)vd.push(new Date(d.updated));
+ for(const v of vd){if(Number.isNaN(v.getTime()))continue;let c=scheduleCandidates(x,v.getFullYear()-1,v.getFullYear()).filter(z=>z.date<=v).pop();if(c)done.add(cardineKey(c.date));}
+ return done;
+}
+function currentCardine(x,atDate){
+  if(!plantODLs(x).length)return null;
+  const now=atDate?new Date(atDate):new Date();now.setHours(12,0,0,0);
+  const done=completedCardines(x);
+  const pending=scheduleCandidates(x,now.getFullYear(),now.getFullYear()+2).filter(c=>c.date>=now&&!done.has(cardineKey(c.date)));
+  return pending[0]||null;
+}
+function maintenanceInfo(x){
+ const os=plantODLs(x);if(!os.length)return {type:"DA DEFINIRE",last:lastVerificationISO(x),next:"",status:"ND",days:null,cardine:null};
+ let types=[...new Set(os.map(o=>o.type).filter(Boolean))],type=types.length===1?types[0]:(types.length?types.join(" / "):"DA DEFINIRE");
+ const now=new Date();now.setHours(12,0,0,0);const c=currentCardine(x,now);
+ if(!c)return {type,last:lastVerificationISO(x),next:"",status:"ND",days:null,cardine:null};
+ let diff=Math.ceil((c.date-now)/86400000),status=diff<0?"SCADUTO":diff<=30?"30":diff<=60?"60":"OK";
+ return {type,last:lastVerificationISO(x),next:localISODate(c.date),status,days:diff,cardine:c};
+}
+function fmtDate(v){
+ if(!v)return "—";if(/^\d{4}-\d{2}-\d{2}$/.test(String(v))){const [y,m,d]=String(v).split("-");return `${d}/${m}/${y}`;}
+ const d=new Date(v);return Number.isNaN(d.getTime())?v:d.toLocaleDateString("it-IT");
+}
+function dueBadge(m){const lab=m.status==="SCADUTO"?"SCADUTO":m.status==="30"?"ENTRO 30 GG":m.status==="60"?"ENTRO 60 GG":m.status==="OK"?"REGOLARE":"DA DEFINIRE";return `<span class="due-badge due-${m.status}">${lab}</span>`;}
+function setDueFilter(v){show("plants");$("duf").value=v;renderList();}
+
+const CHECKS=[
+"Isolatori — pulizia e stato",
+"Connessioni e bullonerie — serraggio",
+"Contatti principali — stato e accoppiamento",
+"Contatti ausiliari — stato e accoppiamento",
+"Snodi e parti mobili — integrità e lubrificazione",
+"Tiranteria / trasmissione — integrità e regolazione",
+"Manovra di APERTURA",
+"Manovra di CHIUSURA",
+"Controllo / segnalazione posizione APERTO",
+"Controllo / segnalazione posizione CHIUSO",
+"Manovra manuale / argano (se presente)",
+"Blocchi elettrici (se presenti)",
+"Blocchi meccanici (se presenti)",
+"Motore / azionamento elettrico (se presente)",
+"Contatti di fine corsa (se presenti)",
+"Teleruttore / contattore comando motore (se presente)",
+"Scaldiglie / anticondensa (se presenti)",
+"Morsettiera — serraggio",
+"Numerazione e segnaletica",
+"Conduttori, discese e collegamenti TE",
+"Organi di attacco / supporto isolatori",
+"Morsetti di collegamento TE — serraggio, continuità elettrica e tenuta meccanica",
+"Isolamento visibile / distanza di sezionamento in posizione APERTA"
+];
+const PREV_CHECKS_21=[
+"Isolatori — pulizia e stato","Connessioni e bullonerie — serraggio","Contatti principali — stato e accoppiamento","Contatti ausiliari — stato e accoppiamento","Snodi e parti mobili — integrità e lubrificazione","Tiranteria / trasmissione — integrità e regolazione","Manovra di APERTURA","Manovra di CHIUSURA","Controllo / segnalazione posizione APERTO","Controllo / segnalazione posizione CHIUSO","Argano / manovra manuale e lucchetto (se presente)","Blocchi elettrici (se presenti)","Blocchi meccanici (se presenti)","Motore / azionamento elettrico (se presente)","Fine corsa / teleruttore (se presente)","Scaldiglie / anticondensa (se presenti)","Morsettiera — serraggio","Numerazione e segnaletica","Conduttori, discese e collegamenti TE","Organi di attacco / supporto isolatori","Morsetti di continuità e tenuta meccanica"
+];
+const SUGGESTIONS={};
+CHECKS.forEach(k=>SUGGESTIONS[k]=`Verificare e ripristinare: ${k}.`);
+const WEIGHTS={}; CHECKS.forEach(k=>WEIGHTS[k]=2);
+Object.assign(WEIGHTS,{"Contatti principali — stato e accoppiamento":3,"Contatti ausiliari — stato e accoppiamento":3,"Tiranteria / trasmissione — integrità e regolazione":3,"Manovra di APERTURA":4,"Manovra di CHIUSURA":4,"Controllo / segnalazione posizione APERTO":4,"Controllo / segnalazione posizione CHIUSO":4,"Blocchi elettrici (se presenti)":3,"Blocchi meccanici (se presenti)":3,"Motore / azionamento elettrico (se presente)":3,"Contatti di fine corsa (se presenti)":4,"Teleruttore / contattore comando motore (se presente)":3,"Isolamento visibile / distanza di sezionamento in posizione APERTA":5});
+const FORCE_A=new Set(["Manovra di APERTURA","Manovra di CHIUSURA","Controllo / segnalazione posizione APERTO","Controllo / segnalazione posizione CHIUSO"]);
+const ELECTRIC_ONLY_3KV=new Set(["Motore / azionamento elettrico (se presente)","Contatti di fine corsa (se presenti)","Teleruttore / contattore comando motore (se presente)"]);
+const CHECKS_15KV=new Set([
+"Isolatori — pulizia e stato",
+"Connessioni e bullonerie — serraggio",
+"Contatti principali — stato e accoppiamento",
+"Snodi e parti mobili — integrità e lubrificazione",
+"Tiranteria / trasmissione — integrità e regolazione",
+"Manovra di APERTURA",
+"Manovra di CHIUSURA",
+"Controllo / segnalazione posizione APERTO",
+"Controllo / segnalazione posizione CHIUSO",
+"Manovra manuale / argano (se presente)",
+"Blocchi elettrici (se presenti)",
+"Blocchi meccanici (se presenti)",
+"Motore / azionamento elettrico (se presente)",
+"Numerazione e segnaletica",
+"Conduttori, discese e collegamenti TE",
+"Organi di attacco / supporto isolatori",
+"Morsetti di collegamento TE — serraggio, continuità elettrica e tenuta meccanica",
+"Isolamento visibile / distanza di sezionamento in posizione APERTA"
+]);
+const OLD_CHECKS=["Isolatori","Lame / contatti principali","Contatti ausiliari","Trasmissione meccanica / cinematismi","Argano / manovra di apertura","Argano / manovra di chiusura","Cavo comando","Cavo controllo / segnalazione di apertura","Cavo controllo / segnalazione di chiusura","Protezione / guaina cavi","Morsettiera / connessioni","Controlli di posizione / fine corsa","Concordanza posizione aperto-chiuso","Cassa / quadro comando","Scaldiglia / anticondensa","Segnaletica / targa identificazione"];
+function effectiveChecks(d){
+ const v=Array.isArray(d?.checks)?d.checks:[];
+ if(v.length===CHECKS.length)return v;
+ if(v.length===PREV_CHECKS_21.length){
+   const prev=Object.fromEntries(PREV_CHECKS_21.map((k,i)=>[k,v[i]||""]));
+   return CHECKS.map(k=>{
+     if(k==="Manovra manuale / argano (se presente)")return prev["Argano / manovra manuale e lucchetto (se presente)"]||"";
+     if(k==="Contatti di fine corsa (se presenti)")return prev["Fine corsa / teleruttore (se presente)"]||"";
+     if(k==="Teleruttore / contattore comando motore (se presente)")return "";
+     if(k==="Morsetti di collegamento TE — serraggio, continuità elettrica e tenuta meccanica")return prev["Morsetti di continuità e tenuta meccanica"]||"";
+     if(k==="Isolamento visibile / distanza di sezionamento in posizione APERTA")return "";
+     return prev[k]||"";
+   });
+ }
+ const old=Object.fromEntries(OLD_CHECKS.map((k,i)=>[k,v[i]||""]));
+ const pick=(...ks)=>ks.some(k=>old[k]==="KO")?"KO":ks.some(k=>old[k]==="OK")?"OK":ks.some(k=>old[k]==="N.A.")?"N.A.":"";
+ const map={
+  "Isolatori — pulizia e stato":pick("Isolatori"),
+  "Connessioni e bullonerie — serraggio":"",
+  "Contatti principali — stato e accoppiamento":pick("Lame / contatti principali"),
+  "Contatti ausiliari — stato e accoppiamento":pick("Contatti ausiliari"),
+  "Snodi e parti mobili — integrità e lubrificazione":pick("Trasmissione meccanica / cinematismi"),
+  "Tiranteria / trasmissione — integrità e regolazione":pick("Trasmissione meccanica / cinematismi"),
+  "Manovra di APERTURA":pick("Argano / manovra di apertura"),
+  "Manovra di CHIUSURA":pick("Argano / manovra di chiusura"),
+  "Controllo / segnalazione posizione APERTO":pick("Cavo controllo / segnalazione di apertura","Controlli di posizione / fine corsa","Concordanza posizione aperto-chiuso"),
+  "Controllo / segnalazione posizione CHIUSO":pick("Cavo controllo / segnalazione di chiusura","Controlli di posizione / fine corsa","Concordanza posizione aperto-chiuso"),
+  "Manovra manuale / argano (se presente)":pick("Argano / manovra di apertura","Argano / manovra di chiusura"),
+  "Blocchi elettrici (se presenti)":"",
+  "Blocchi meccanici (se presenti)":"",
+  "Motore / azionamento elettrico (se presente)":pick("Cavo comando"),
+  "Contatti di fine corsa (se presenti)":pick("Controlli di posizione / fine corsa"),
+  "Teleruttore / contattore comando motore (se presente)":"",
+  "Scaldiglie / anticondensa (se presenti)":pick("Scaldiglia / anticondensa"),
+  "Morsettiera — serraggio":pick("Morsettiera / connessioni"),
+  "Numerazione e segnaletica":pick("Segnaletica / targa identificazione"),
+  "Conduttori, discese e collegamenti TE":"",
+  "Organi di attacco / supporto isolatori":"",
+  "Morsetti di collegamento TE — serraggio, continuità elettrica e tenuta meccanica":"",
+  "Isolamento visibile / distanza di sezionamento in posizione APERTA":""
+ };
+ return CHECKS.map(k=>map[k]||"");
+}
+function checkApplies(label,system,actuation){
+ const is15=String(system||"").startsWith("15 kV");
+ if(is15 && !CHECKS_15KV.has(label))return false;
+ if(actuation==="Manuale" && (label==="Motore / azionamento elettrico (se presente)"||label==="Contatti di fine corsa (se presenti)"||label==="Teleruttore / contattore comando motore (se presente)"))return false;
+ if(!is15 && label==="Isolamento visibile / distanza di sezionamento in posizione APERTA")return false;
+ return true;
+}
+let adminAuthenticated=false;
+let personnel=JSON.parse(localStorage.getItem("sezPersonnel_TEST_PULITO")||"[]");
+const TEST_DB_SEED={};
+let db=JSON.parse(localStorage.getItem("sezDB_TEST_PULITO")||"null")||structuredClone(TEST_DB_SEED),current=null;
+let config=JSON.parse(localStorage.getItem("sezConfig_TEST_PULITO")||"null")||{...defaultConfig(),umId:"UMTE1 Gallarate",nuclei:["Gallarate","Laveno","Domodossola","Arona"]};
+const __storedMaster=JSON.parse(localStorage.getItem("sezRegistry_TEST_PULITO")||"null");
+if(Array.isArray(__storedMaster)&&__storedMaster.length) MASTER=__storedMaster;
+const $=id=>document.getElementById(id), norm=v=>String(v??"").trim().toUpperCase(), esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+function searchCompact(v){return String(v??"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toUpperCase().replace(/[^A-Z0-9]/g,"");}
+function plantSearchMatch(x,q){
+  const raw=String(q??"").trim();
+  if(!raw)return true;
+  const hay=norm([x.id,x.localita,x.nucleo,x.definition,x.codice].join(" "));
+  const compactHay=searchCompact([x.id,x.localita,x.nucleo,x.definition,x.codice].join(" "));
+  const tokens=raw.split(/\s+/).filter(Boolean);
+  return tokens.every(t=>{
+    const nt=norm(t),ct=searchCompact(t);
+    return hay.includes(nt)||(ct&&compactHay.includes(ct));
+  });
+}
+let __toastTimer=null;
+function appToast(message,type="ok",ms=3600){
+  const el=$("appToast"); if(!el)return;
+  clearTimeout(__toastTimer);
+  el.textContent=message; el.className="app-toast "+type+" show";
+  __toastTimer=setTimeout(()=>el.classList.remove("show"),ms);
+}
+function isMobileMaintenanceMode(){return window.matchMedia&&window.matchMedia("(max-width: 900px)").matches;}
+function kmMissing(v){if(v===null||v===undefined||String(v).trim()==="")return true;let n=Number(String(v).replace(",","."));return Number.isFinite(n)&&n===0}
+function km(v){if(kmMissing(v))return "DA INSERIRE";let n=Number(String(v).replace(",","."));return Number.isFinite(n)?n.toFixed(3).replace(".","+"):v}
+function kmEditValue(v){return kmMissing(v)?"":String(v??"").replace("+",".").replace(",",".")}
+function state(x){return db[x.id]||{}}
+function inferActuation(d,x){const s=((d?.azionamento||"")+" "+(d?.argtipo||"")).toUpperCase();if(s.includes("ELETTR")||s.includes("IMS")||s.includes("MOTOR"))return "Elettrico";if(s.includes("MANUAL"))return "Manuale";if(x){const ts=[...new Set(plantODLs(x).map(o=>o.type).filter(Boolean))];if(ts.length===1)return ts[0]==="ELETTRICA"?"Elettrico":ts[0]==="MANUALE"?"Manuale":"";}return "";}
+function inferSystem(x,d){return /15\s*KV/i.test(String(x?.definition||""))?"15 kV 16,7 Hz CA":"3 kV CC";}
+function tag(v){let z=norm(v)||"—",cl=z==="N.A."?"NA":z;return `<span class="tag ${cl}">${esc(z)}</span>`}
+function displayActuation(x){const d=state(x);return d.azionamento||inferActuation(d,x)||"DA DEFINIRE";}
+function calcObj(x){let d=state(x),vals=effectiveChecks(d),kos=CHECKS.filter((k,i)=>vals[i]==="KO"),an=kos.length+(String(d.anom||"").trim()?1:0),idx=kos.reduce((sum,k)=>sum+(WEIGHTS[k]||0),0)+(String(d.anom||"").trim()?2:0),forcedA=kos.some(k=>FORCE_A.has(k));return {an,idx,fas:forcedA||idx>=8?"ROSSO":idx>=4?"ARANCIONE":idx>=1?"GIALLO":"VERDE",pri:forcedA||idx>=8?"A":idx>=4?"B":idx>=1?"C":"D",done:d.draft?"BOZZA":(d.saved?"SI":"NO")}}
+function show(v){if(isMobileMaintenanceMode())v="plants";["dash","plants","pp","critical"].forEach(id=>$(id).classList.toggle("hidden",id!==v));document.querySelectorAll(".navbtn[data-v]").forEach(b=>b.classList.toggle("active",b.dataset.v===v));document.querySelectorAll("[data-mobile-v]").forEach(b=>b.classList.toggle("active",b.dataset.mobileV===v));if(v==="dash")renderDash();if(v==="plants")renderList();if(v==="pp")renderPP();if(v==="critical")renderCritical();window.scrollTo({top:0,behavior:"auto"});}
+document.querySelectorAll(".navbtn[data-v]").forEach(b=>b.onclick=()=>show(b.dataset.v));
+function renderDash(){let t=MASTER.length,d=MASTER.filter(x=>state(x).saved).length,a=MASTER.filter(x=>calcObj(x).pri==="A").length;let kmMiss=MASTER.filter(x=>kmMissing(x.kmI)||kmMissing(x.kmF)).length;let dc={SCADUTO:0,"30":0,"60":0,OK:0,ND:0};MASTER.forEach(x=>dc[maintenanceInfo(x).status]++);$("kpis").innerHTML=[["Totale sezionatori",t],["Verificati",d],["Da verificare",t-d],["Scaduti",dc.SCADUTO],["Entro 30 gg",dc["30"]],["Km da completare",kmMiss]].map((x,i)=>`<div class="card kpi" ${i===3?'onclick="setDueFilter(\'SCADUTO\')" style="cursor:pointer"':i===4?'onclick="setDueFilter(\'30\')" style="cursor:pointer"':''}><div class="label">${x[0]}</div><div class="value">${x[1]}</div></div>`).join("");let nuclei=config.nuclei||[];$("bars").innerHTML=nuclei.map(n=>{let ss=MASTER.filter(x=>norm(x.nucleo)===norm(n)),dd=ss.filter(x=>state(x).saved).length,p=ss.length?Math.round(dd/ss.length*100):0;return `<div class="barrow"><b>${n}</b><div class="bar"><span style="width:${p}%"></span></div><b>${p}%</b></div>`}).join("");let co={A:0,B:0,C:0,D:0};MASTER.forEach(x=>co[calcObj(x).pri]++);$("prio").innerHTML=Object.entries(co).map(([k,v])=>`<p>${tag(k)} <b style="margin-left:8px">${v}</b></p>`).join("");$("alerts").innerHTML=MASTER.filter(x=>["A","B"].includes(calcObj(x).pri)).slice(0,8).map(x=>`<p>${tag(calcObj(x).pri)} <b>${esc(x.id)}</b> — ${esc(x.localita)} <span class="muted">${esc(x.nucleo)}</span></p>`).join("")||'<p class="muted">Nessuna criticità A/B.</p>';$("dueSummary").innerHTML=`<p onclick="setDueFilter('SCADUTO')" style="cursor:pointer">${dueBadge({status:'SCADUTO'})} <b>${dc.SCADUTO}</b></p><p onclick="setDueFilter('30')" style="cursor:pointer">${dueBadge({status:'30'})} <b>${dc['30']}</b></p><p onclick="setDueFilter('60')" style="cursor:pointer">${dueBadge({status:'60'})} <b>${dc['60']}</b></p><p onclick="setDueFilter('ND')" style="cursor:pointer">${dueBadge({status:'ND'})} <b>${dc.ND}</b></p>`;}
+function renderList(){
+ let qq=$("q").value||"",nn=norm($("nf").value),pp=norm($("pf").value),cc=norm($("cf").value),kk=norm($("kmf").value),du=$("duf")?.value||"";
+ let f=MASTER.filter(x=>{
+   let c=calcObj(x),m=maintenanceInfo(x),missing=kmMissing(x.kmI)||kmMissing(x.kmF);
+   return plantSearchMatch(x,qq)&&(!nn||norm(x.nucleo)===nn)&&(!pp||c.pri===pp)&&(!cc||c.done===cc)&&(!kk||(kk==="MANCANTE"&&missing)||(kk==="OK"&&!missing))&&(!du||m.status===du);
+ });
+ f.sort((a,b)=>{let A=maintenanceInfo(a),B=maintenanceInfo(b);return (A.next||"9999").localeCompare(B.next||"9999")||a.id.localeCompare(b.id)});
+ $("count").textContent=f.length+" impianti";
+ $("tbody").innerHTML=f.map(x=>{let c=calcObj(x),m=maintenanceInfo(x),cl=m.status==="SCADUTO"?"overdue-row":(["30","60"].includes(m.status)?"soon-row":""),act=displayActuation(x);return `<tr class="${cl} touch-open" onclick="openSheet('${x.id}')"><td><b>${esc(x.id)}</b></td><td>${esc(x.localita)}</td><td>${esc(x.nucleo)}</td><td>${esc(x.definition)}</td><td>${km(x.kmI)}${x.kmF!==x.kmI?" ÷ "+km(x.kmF):""}</td><td>${esc(act)}</td><td>${fmtDate(m.last)}</td><td class="due-date">${fmtDate(m.next)}</td><td>${dueBadge(m)}</td><td>${tag(c.pri)}</td><td>${tag(c.done)}</td></tr>`}).join("");
+ const mb=$("mobilePlants");
+ if(mb)mb.innerHTML=f.map(x=>{let c=calcObj(x),m=maintenanceInfo(x),act=displayActuation(x);return `<div class="plant-card" onclick="openSheet('${x.id}')"><div class="plant-card-head"><div><div class="plant-card-id">${esc(x.id)}</div><div class="plant-card-place">${esc(x.localita||"—")}</div><small>${esc(x.definition||"")}</small></div><div>${tag(c.pri)}</div></div><div class="plant-card-meta"><span>${esc(x.nucleo||"—")}</span><span>${esc(act)}</span><span>Km ${km(x.kmI)}</span><span>${tag(c.done)}</span></div><div class="plant-card-due"><small>Prossima: <b>${fmtDate(m.next)}</b></small>${dueBadge(m)}</div><div class="mobile-maint-cta">INSERISCI MANUTENZIONE</div></div>`}).join("")||'<div class="card muted">Nessun impianto con i filtri selezionati.</div>';
+}
+function field(label,id,val="",type="input",choices=[]){let ctl=type==="select"?`<select id="${id}"><option></option>${choices.map(v=>`<option ${norm(val)===norm(v)?"selected":""}>${esc(v)}</option>`).join("")}</select>`:type==="area"?`<textarea id="${id}">${esc(val)}</textarea>`:`<input id="${id}" value="${esc(val)}">`;return `<div class="field"><label>${label}</label>${ctl}</div>`}
+function ro(label,val){return `<div class="field"><label>${label}</label><input class="readonly" readonly value="${esc(val)}"></div>`}
+function renderCritical(){const arr=MASTER.filter(x=>calcObj(x).pri==="A");$("ctbody").innerHTML=arr.map(x=>{let c=calcObj(x),d=state(x);return `<tr class="touch-open" onclick="openSheet('${x.id}')"><td><b>${esc(x.id)}</b></td><td>${esc(x.localita)}</td><td>${esc(x.nucleo)}</td><td>${c.idx}</td><td>${c.an}</td><td style="white-space:normal;max-width:420px">${esc(d.anom||d.note||"")}</td></tr>`}).join("");const mb=$("mobileCritical");if(mb)mb.innerHTML=arr.map(x=>{let c=calcObj(x),d=state(x);return `<div class="plant-card" onclick="openSheet('${x.id}')"><div class="plant-card-head"><div><div class="plant-card-id">${esc(x.id)}</div><div class="plant-card-place">${esc(x.localita||"—")}</div><small>${esc(x.nucleo||"")}</small></div>${tag("A")}</div><div class="plant-card-meta"><span>Indice ${c.idx}</span><span>${c.an} anomalie</span></div>${(d.anom||d.note)?`<div class="history-note">${esc(d.anom||d.note)}</div>`:""}</div>`}).join("")||'<div class="card muted">Nessun impianto in priorità A.</div>';}
+
+function openSheet(id){current=MASTER.find(x=>x.id===id);let d=state(current),work=d.draft||d;$('sheetTitle').textContent='Sezionatore — '+current.id;
+$('anag').innerHTML=ro('Sede tecnica',current.id)+ro('Codice sede 1° livello',current.codice)+ro('Tratta / Località',current.localita)+ro('Nucleo',current.nucleo)+ro('Definizione sede tecnica',current.definition)+field('Km inizio','kmEditI',kmEditValue(work.kmI??current.kmI))+field('Km fine','kmEditF',kmEditValue(work.kmF??current.kmF))+ro('Stato utente',current.stato);
+let mi=maintenanceInfo(current);$('anag').innerHTML+=ro('Tipo manovra manutentiva',mi.type)+ro('Ultima verifica',fmtDate(mi.last))+ro('Prossima scadenza',fmtDate(mi.next))+ro('Stato scadenza',mi.status==='SCADUTO'?'SCADUTO':mi.status==='30'?'ENTRO 30 GG':mi.status==='60'?'ENTRO 60 GG':mi.status==='OK'?'REGOLARE':'DA DEFINIRE');
+const sistema=work.sistema||d.sistema||inferSystem(current,d); const azionamento=work.azionamento||d.azionamento||inferActuation(d,current);
+$('ident').innerHTML=field('Sistema / tensione','sistema',sistema,'select',['3 kV CC','15 kV 16,7 Hz CA'])+field('Azionamento','azionamento',azionamento,'select',['Manuale','Elettrico'])+field('Numero / identificazione in campo','numsez',work.numsez??d.numsez);
+const baseChecks=effectiveChecks(d),draftChecks=Array.isArray(work.checks)&&work!==d?work.checks:null,ev=draftChecks&&draftChecks.length===CHECKS.length?draftChecks:baseChecks;
+function renderDynamicChecks(){const sys=$('sistema')?.value||sistema,az=$('azionamento')?.value||azionamento;$('checks').innerHTML=CHECKS.map((k,i)=>{if(!checkApplies(k,sys,az))return '';return field(k,'c'+i,ev[i],'select',['OK','KO','N.A.']);}).join('');document.querySelectorAll('#checks select').forEach(e=>e.addEventListener('input',recalcCurrent));}
+renderDynamicChecks(); $('azionamento')?.addEventListener('change',()=>{renderDynamicChecks();recalcCurrent();});$('sistema')?.addEventListener('change',()=>{renderDynamicChecks();recalcCurrent();});
+$('notes').innerHTML='<div class="field full"><label>Anomalie rilevate automaticamente</label><textarea id="autoanom" class="readonly" readonly></textarea></div>'+'<div class="field full"><label>Interventi suggeriti automaticamente</label><textarea id="autoprev" class="readonly" readonly></textarea></div>'+field('Ulteriore anomalia / dettaglio operatore','anom',work.anom??d.anom,'area')+field('Intervento da programmare / integrazione','prev',work.prev??d.prev,'area')+'<div class="field full">'+field('Intervento eseguito / Note','note',work.note??d.note,'area').replace('<div class="field">','')+'</div>';
+document.querySelectorAll('#sheet select,#sheet input,#sheet textarea').forEach(e=>e.addEventListener('input',recalcCurrent));
+pendingPhotoData=work.photo??d.photo??'';renderPhotoPreview();renderHistory(d);recalcCurrent();$('sheet').classList.add('open')}
+
+let pendingPhotoData="";
+function historyMetrics(h){const vals=effectiveChecks(h||{}),kos=CHECKS.filter((k,i)=>vals[i]==="KO"),idx=Number(h?.index??kos.reduce((sum,k)=>sum+(WEIGHTS[k]||0),0)),forced=kos.some(k=>FORCE_A.has(k));return {kos,idx,pri:forced||idx>=8?"A":idx>=4?"B":idx>=1?"C":"D"};}
+function renderHistory(d){const box=$("historyList");if(!box)return;let rows=[];if(d?.saved)rows.push({...d,__current:true,date:d.updated||""});if(Array.isArray(d?.history))rows.push(...[...d.history].reverse());box.innerHTML=rows.length?rows.map((h,i)=>{const m=historyMetrics(h),dt=fmtDate(h.updated||h.date||"");return `<div class="history-item"><div class="history-head"><b>${h.__current?"Verifica attuale":"Verifica precedente"} — ${dt}</b>${tag(m.pri)}</div><div class="history-meta">${esc(h.sistema||"")} ${h.azionamento?" · "+esc(h.azionamento):""} · Indice ${m.idx} · KO ${m.kos.length}</div>${h.anom?`<div class="history-note"><b>Anomalia:</b> ${esc(h.anom)}</div>`:""}${h.prev?`<div class="history-note"><b>Da programmare:</b> ${esc(h.prev)}</div>`:""}${h.note?`<div class="history-note"><b>Note:</b> ${esc(h.note)}</div>`:""}${h.photo?`<img class="history-photo" src="${h.photo}" alt="Foto anomalia verifica">`:""}</div>`}).join(""):'<div class="muted">Nessuna verifica precedente registrata.</div>';}
+function renderPhotoPreview(){const img=$("photoPreview");if(!img)return;if(pendingPhotoData){img.src=pendingPhotoData;img.classList.remove("hidden");}else{img.removeAttribute("src");img.classList.add("hidden");}}
+function clearAnomalyPhoto(){pendingPhotoData="";const f=$("anomalyPhoto");if(f)f.value="";renderPhotoPreview();}
+function handleAnomalyPhoto(input){const file=input?.files?.[0];if(!file)return;const reader=new FileReader();reader.onload=()=>{const im=new Image();im.onload=()=>{const max=900,scale=Math.min(1,max/Math.max(im.width,im.height)),w=Math.max(1,Math.round(im.width*scale)),h=Math.max(1,Math.round(im.height*scale)),c=document.createElement("canvas");c.width=w;c.height=h;c.getContext("2d").drawImage(im,0,0,w,h);pendingPhotoData=c.toDataURL("image/jpeg",.58);renderPhotoPreview();};im.src=reader.result;};reader.readAsDataURL(file);}
+function closeSheet(){$('sheet').classList.remove('open');current=null}
+function currentFormValues(){
+ const system=$('sistema')?.value||'',actuation=$('azionamento')?.value||'';
+ const checks=CHECKS.map((k,i)=>checkApplies(k,system,actuation)?($('c'+i)?.value||''):'N.A.');
+ return {system,actuation,checks};
+}
+
+function recalcCurrent(){if(!current)return;let f=currentFormValues(),vals=f.checks,kos=CHECKS.filter((k,i)=>checkApplies(k,f.system,f.actuation)&&vals[i]==='KO');let operatorAnom=($('anom')?.value||'').trim();let an=kos.length+(operatorAnom?1:0);let idx=kos.reduce((sum,k)=>sum+(WEIGHTS[k]||0),0)+(operatorAnom?2:0);let forcedA=kos.some(k=>FORCE_A.has(k));let fas=forcedA||idx>=8?'ROSSO':idx>=4?'ARANCIONE':idx>=1?'GIALLO':'VERDE';let pri=forcedA||idx>=8?'A':idx>=4?'B':idx>=1?'C':'D';if($('autoanom'))$('autoanom').value=kos.length?kos.map(k=>'• '+k+': KO').join('\n'):'Nessuna anomalia automatica rilevata.';if($('autoprev'))$('autoprev').value=kos.length?kos.map(k=>'• '+SUGGESTIONS[k]).join('\n'):'Nessun intervento suggerito.';if($('photoGroup'))$('photoGroup').classList.toggle('hidden',!(kos.length||operatorAnom||pendingPhotoData));$('results').innerHTML=[["Anomalie",an],["Indice",idx],["Fascia",tag(fas)],["Priorità",tag(pri)]].map(x=>`<div class="result"><small>${x[0]}</small><strong>${x[1]}</strong></div>`).join('')}
+function readKmForSave(requireComplete=false){let rawI=($('kmEditI')?.value||'').trim().replace('+','.').replace(',','.'),rawF=($('kmEditF')?.value||'').trim().replace('+','.').replace(',','.');let nI=Number(rawI),nF=Number(rawF);if(requireComplete&&(!rawI||!rawF||!Number.isFinite(nI)||!Number.isFinite(nF)||nI<=0||nF<=0))return null;return {rawI,rawF,nI:Number.isFinite(nI)?nI:'',nF:Number.isFinite(nF)?nF:''};}
+async function saveDraft(){
+ if(!current)return;const f=currentFormValues();
+ if(!f.system||!f.actuation){appToast('Seleziona Sistema / tensione e Azionamento prima di salvare la bozza.','err',4800);return;}
+ const k=readKmForSave(false),old=db[current.id]||{};
+ db[current.id]={...old,draft:{sistema:f.system,azionamento:f.actuation,numsez:$('numsez').value,checks:f.checks,anom:$('anom').value,prev:$('prev').value,note:$('note').value,photo:pendingPhotoData||'',kmI:k?.nI||'',kmF:k?.nF||'',updated:new Date().toISOString()}};
+ try{
+   const synced=await writeSharedData();
+   renderDash();renderList();renderCritical();
+   appToast(synced===false?'Bozza salvata sul dispositivo. Sincronizzazione in coda.':'Bozza salvata e sincronizzata.',''+(synced===false?'warn':'ok'),4200);
+ }catch(e){
+   appToast('Salvataggio bozza non riuscito.','err',5000);
+ }
+}
+async function saveCurrent(){if(!current)return;const f=currentFormValues();if(!f.system||!f.actuation){appToast('Seleziona Sistema / tensione e Azionamento prima di chiudere la verifica.','err',4800);return;}const visible=CHECKS.map((k,i)=>({k,i,applies:checkApplies(k,f.system,f.actuation),v:f.checks[i]})).filter(x=>x.applies);if(visible.some(x=>!x.v)){appToast('Per chiudere la verifica devi compilare tutti i controlli applicabili. Se non hai finito usa SALVA BOZZA.','err',5600);return;}let cardineDaSoddisfare=currentCardine(current,new Date());let k=readKmForSave(true);if(!k){appToast('Inserisci Km inizio e Km fine con una progressiva valida maggiore di 0.','err',5200);return;}current.kmI=k.nI;current.kmF=k.nF;let vals=f.checks,kos=CHECKS.filter((label,i)=>checkApplies(label,f.system,f.actuation)&&vals[i]==='KO'),idx=kos.reduce((sum,label)=>sum+(WEIGHTS[label]||0),0)+($('anom').value.trim()?2:0);let old=db[current.id]||{};let history=Array.isArray(old.history)?[...old.history]:[];if(old.saved){history.push({date:old.updated||new Date().toISOString(),updated:old.updated||'',sistema:old.sistema||inferSystem(current,old),azionamento:old.azionamento||inferActuation(old,current),tip:old.tip||'',argtipo:old.argtipo||'',numsez:old.numsez||'',checks:Array.isArray(old.checks)?[...old.checks]:[],anom:old.anom||'',prev:old.prev||'',note:old.note||'',photo:old.photo||'',index:old.index||0});}let completed=[...completedCardines(current)];if(cardineDaSoddisfare){let ck=cardineKey(cardineDaSoddisfare.date);if(!completed.includes(ck))completed.push(ck);}const {draft,...oldNoDraft}=old;db[current.id]={...oldNoDraft,completedCardines:completed,history,saved:true,sistema:f.system,azionamento:f.actuation,tip:old.tip||'Sezionatore',argtipo:old.argtipo||f.actuation,numsez:$('numsez').value,checks:vals,anom:$('anom').value,prev:$('prev').value,note:$('note').value,photo:pendingPhotoData||'',index:idx,kmI:k.nI,kmF:k.nF,kmUpdated:new Date().toISOString(),updated:new Date().toISOString()};try{const synced=await writeSharedData();const savedId=current.id;renderDash();renderList();renderCritical();openSheet(savedId);appToast(synced===false?'Verifica salvata sul dispositivo. Sincronizzazione in coda.':'Verifica salvata e sincronizzata. Storico e prossima scadenza aggiornati.',synced===false?'warn':'ok',5200);}catch(e){appToast('Salvataggio non riuscito.','err',5200);}}
+
+function openFactoryReset(){
+  if(!adminAuthenticated){alert("Accedi all'Amministrazione per eseguire il reset.");return;}
+  $("factoryResetPass").value="";
+  $("factoryResetPanel").classList.remove("hidden");
+}
+function closeFactoryReset(){
+  $("factoryResetPanel").classList.add("hidden");
+  $("factoryResetPass").value="";
+}
+async function deleteSavedArchiveHandle(){
+  try{
+    const idb=await openArchiveDB();
+    await new Promise((resolve,reject)=>{
+      const tx=idb.transaction(ARCHIVE_STORE,"readwrite");
+      tx.objectStore(ARCHIVE_STORE).delete(ARCHIVE_KEY);
+      tx.oncomplete=()=>resolve();
+      tx.onerror=()=>reject(tx.error);
+    });
+    idb.close();
+  }catch(e){console.warn("Impossibile eliminare il collegamento salvato",e);}
+}
+async function clearSharedArchiveFile(){
+  if(!archiveDirHandle) return;
+  const fh=await archiveDirHandle.getFileHandle(ARCHIVE_FILE,{create:true});
+  const w=await fh.createWritable();
+  await w.write("{}");
+  await w.close();
+}
+async function confirmFactoryReset(){
+  if(!adminAuthenticated){alert("Sessione amministratore non valida.");return;}
+  const p=$("factoryResetPass").value;
+  if(await hashText(p)!==config.passwordHash){alert("Password amministratore non corretta.");return;}
+  if(!confirm("ATTENZIONE: verranno cancellati anagrafica, verifiche e configurazione UM dall'archivio collegato. Continuare?")) return;
+  if(!confirm("ULTIMA CONFERMA: il censimento verrà riportato allo stato di PRIMA INSTALLAZIONE. L'operazione non è annullabile salvo backup. Confermi?")) return;
+  try{
+    await clearSharedArchiveFile();
+    localStorage.removeItem("sezDB");
+    localStorage.removeItem("sezRegistry");
+    localStorage.removeItem("sezConfig");
+    localStorage.removeItem("sezPersonnel");
+    await deleteSavedArchiveHandle();
+    adminAuthenticated=false;
+    archiveDirHandle=null;
+    db={}; MASTER=[]; personnel=[]; config=defaultConfig(); current=null;
+    closeFactoryReset();
+    $("adminPanel").classList.add("hidden");
+    $("setupGate").classList.add("hidden");
+    setArchiveUI(false,"Reset completato. Collega nuovamente l'Archivio Sezionatori per iniziare una nuova configurazione.");
+    refreshConfigUI();
+    alert("Reset completato. L'app è tornata allo stato di prima installazione.");
+  }catch(e){
+    console.error(e);
+    alert("Reset non completato: "+(e?.message||e));
+  }
+}
+
+function defaultConfig(){return {umId:"",description:"",nuclei:[],passwordHash:"",recoveryCodeHash:""}}
+async function hashText(t){const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(t));return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,"0")).join("")}
+function refreshConfigUI(){document.title=config.umId?`Censimento Sezionatori - ${config.umId}`:"Censimento Sezionatori UMTE";document.querySelector(".brand").innerHTML=(config.umId?`Censimento Sezionatori - ${esc(config.umId)}`:"Censimento Sezionatori UMTE")+"<small>SEZIONATORI TE</small>";let nf=$("nf"),v=nf.value;let nuclei=[...new Set([...(config.nuclei||[]),...MASTER.map(x=>x.nucleo).filter(Boolean)])].sort((a,b)=>a.localeCompare(b,"it"));nf.innerHTML='<option value="">Tutti i nuclei</option>'+nuclei.map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join("");nf.value=v;renderDash();renderList()}
+async function completeSetup(){let um=$("setupUM").value.trim(),nu=$("setupNucleo").value.trim(),p=$("setupPass").value,p2=$("setupPass2").value;if(!um||!nu){$("setupMsg").textContent="Inserisci identificativo UM e almeno un nucleo.";return}if(p.length<6){$("setupMsg").textContent="La password deve avere almeno 6 caratteri.";return}if(p!==p2){$("setupMsg").textContent="Le password non coincidono.";return}const recoveryCode=makeRecoveryCode();config={...defaultConfig(),umId:um,nuclei:[nu],passwordHash:await hashText(p),recoveryCodeHash:await hashText(recoveryCode.toUpperCase())};await persistAll();$("setupGate").classList.add("hidden");refreshConfigUI();alert("CONFIGURAZIONE CREATA\n\nCodice di recupero amministratore: "+recoveryCode+"\n\nAnnotalo e conservalo separatamente. Non verrà mostrato nuovamente in chiaro.")}
+function openAdminLogin(){if(currentUserRole!=="admin"){appToast("Accesso riservato agli amministratori.","err",4200);return;}adminAuthenticated=true;openAdminPanel()}
+function closeAdminLogin(){$("adminLogin").classList.add("hidden")}
+async function adminLogin(){if(currentUserRole!=="admin"){appToast("Accesso non autorizzato.","err",4200);return;}adminAuthenticated=true;closeAdminLogin();openAdminPanel()}
+function openAdminPanel(){if(currentUserRole!=="admin"){appToast("Accesso riservato agli amministratori.","err",4200);return;}adminAuthenticated=true;$("cfgUM").value=config.umId||"";$("cfgDesc").value=config.description||"";renderNuclei();renderAdminPlants();renderPersonnel();checkPPTemplate();if($("ppLastProgressiveAdmin"))$("ppLastProgressiveAdmin").value=ppLastProgressive||0;$("adminPanel").classList.remove("hidden")}
+function closeAdminPanel(){adminAuthenticated=false;$("adminPanel").classList.add("hidden");refreshConfigUI()}
+function renderNuclei(){$("nucleiList").innerHTML=(config.nuclei||[]).map((n,i)=>`<div class="nucleo-pill">${esc(n)} <button onclick="removeNucleo(${i})">×</button></div>`).join("")}
+function addNucleo(){let v=$("newNucleo").value.trim();if(v&&!config.nuclei.some(n=>norm(n)===norm(v)))config.nuclei.push(v);$("newNucleo").value="";renderNuclei();renderAdminPlants()}
+function removeNucleo(i){let n=config.nuclei[i];if(MASTER.some(x=>norm(x.nucleo)===norm(n))&&!confirm(`Il nucleo ${n} è associato a sezionatori. Rimuoverlo comunque dall'elenco?`))return;config.nuclei.splice(i,1);renderNuclei();renderAdminPlants()}
+async function saveConfig(){if(currentUserRole!=="admin"){appToast("Accesso non autorizzato.","err",4200);return;}let um=$("cfgUM").value.trim();if(!um){alert("Inserisci l'identificativo UM.");return}config.umId=um;config.description=$("cfgDesc").value.trim();await persistAll();refreshConfigUI();alert("Configurazione salvata.")}
+async function persistAll(syncPlants=false){cacheAllLocal();await cloudSaveGlobals();if(syncPlants)await syncAllPlantStates();}
+function plantRow(x,i){let opts=(config.nuclei||[]).map(n=>`<option ${norm(n)===norm(x.nucleo)?"selected":""}>${esc(n)}</option>`).join("");let hasControl=!!db[x.id]&&(!!db[x.id].saved||!!db[x.id].draft||Array.isArray(db[x.id].history)&&db[x.id].history.length>0);return `<tr data-i="${i}"><td><input data-k="id" value="${esc(x.id||"")}"></td><td><input data-k="definition" value="${esc(x.definition||"")}"></td><td><input data-k="localita" value="${esc(x.localita||"")}"></td><td><select data-k="nucleo"><option></option>${opts}</select></td><td><input data-k="kmI" value="${esc(x.kmI??"")}"></td><td><input data-k="kmF" value="${esc(x.kmF??"")}"></td><td><select data-k="stato"><option ${x.stato==="ESER"?"selected":""}>ESER</option><option ${x.stato==="DISATTIVATO"?"selected":""}>DISATTIVATO</option></select></td><td><button class="admin-btn" onclick="savePlantRow(${i})">SALVA</button> <button class="admin-btn" ${hasControl?'':'disabled title="Nessun controllo registrato"'} onclick="resetPlantControl(${i})">AZZERA CONTROLLO</button> <button class="admin-btn danger" onclick="deletePlant(${i})">ELIMINA</button></td></tr>`}
+function renderAdminResetPlantOptions(){
+  const dl=$("adminResetPlantOptions");if(!dl)return;
+  dl.innerHTML=MASTER.slice().sort((a,b)=>String(a.id||"").localeCompare(String(b.id||""),"it",{numeric:true})).map(x=>`<option value="${esc(x.id||"")}">${esc([x.localita,x.nucleo,x.definition].filter(Boolean).join(" · "))}</option>`).join("");
+}
+function renderAdminPlants(){let q=norm($("adminSearch")?.value||"");let arr=MASTER.map((x,i)=>({x,i})).filter(o=>!q||norm([o.x.id,o.x.localita,o.x.nucleo,o.x.definition].join(" ")).includes(q));$("adminPlants").innerHTML=arr.slice(0,500).map(o=>plantRow(o.x,o.i)).join("");renderAdminResetPlantOptions()}
+async function resetSelectedPlantControl(){
+  if(currentUserRole!=="admin"||!adminAuthenticated){appToast("Accesso riservato agli amministratori.","err",4200);return;}
+  const raw=$("adminResetPlant")?.value?.trim()||"";
+  if(!raw){appToast("Seleziona prima il sezionatore da azzerare.","warn",4200);return;}
+  const i=MASTER.findIndex(x=>norm(x.id)===norm(raw));
+  if(i<0){appToast("Sezionatore non trovato. Selezionalo dall’elenco proposto.","err",4600);return;}
+  await resetPlantControl(i);
+  if($("adminResetPlant"))$("adminResetPlant").value="";
+}
+function newPlantRow(){MASTER.unshift({id:"NUOVO-ID",definition:"",localita:"",nucleo:config.nuclei[0]||"",kmI:"",kmF:"",stato:"ESER",codice:""});renderAdminPlants()}
+async function savePlantRow(i){let tr=document.querySelector(`tr[data-i="${i}"]`),old=MASTER[i],obj={...old};tr.querySelectorAll("[data-k]").forEach(el=>obj[el.dataset.k]=el.value.trim());if(!obj.id){alert("ID/Sede tecnica obbligatorio.");return}if(MASTER.some((x,j)=>j!==i&&norm(x.id)===norm(obj.id))){alert("Esiste già un sezionatore con questo ID.");return}const oldId=old.id;if(oldId!==obj.id&&db[oldId]){db[obj.id]=db[oldId];delete db[oldId]}obj.codice=obj.codice||obj.id.split("-")[0]||"";MASTER[i]=obj;await persistAll();if(db[obj.id])await cloudUpsertPlant(obj.id,db[obj.id]);if(oldId!==obj.id)await cloudDeletePlant(oldId);renderAdminPlants();refreshConfigUI()}
+async function resetPlantControl(i){
+  if(currentUserRole!=="admin"||!adminAuthenticated){appToast("Accesso riservato agli amministratori.","err",4200);return;}
+  const x=MASTER[i]; if(!x)return;
+  const d=db[x.id];
+  if(!d||(!d.saved&&!d.draft&&!(Array.isArray(d.history)&&d.history.length))){appToast("Nessun controllo da azzerare per questo sezionatore.","warn",4200);return;}
+  if(!confirm(`Azzerare il controllo registrato per ${x.id}?\n\nIl sezionatore resterà in anagrafica, ma verranno cancellati verifica attuale, eventuale bozza, storico verifiche, anomalie, foto e cardini completati.`))return;
+  if(!confirm("Conferma definitiva dell'azzeramento del controllo. Questa operazione non è annullabile salvo ripristino da backup."))return;
+  delete db[x.id];
+  cacheAllLocal();
+  let cloudOk=true;
+  try{await cloudSaveGlobals(); cloudOk=await cloudDeletePlant(x.id);}catch(e){cloudOk=false;console.error(e);}
+  if(current&&current.id===x.id){current=null;pendingPhotoData="";}
+  renderAdminPlants();refreshConfigUI();renderCritical();
+  appToast(cloudOk===false?"Controllo azzerato sul dispositivo. Sincronizzazione cloud in coda.":"Controllo azzerato. Il sezionatore risulta nuovamente da verificare.",cloudOk===false?"warn":"ok",5200);
+}
+
+async function deletePlant(i){let x=MASTER[i];if(!confirm(`Eliminare definitivamente ${x.id}? Verranno eliminati anche i dati di verifica associati.`))return;if(!confirm("Conferma eliminazione definitiva. L'operazione non è annullabile salvo backup."))return;delete db[x.id];MASTER.splice(i,1);await persistAll();await cloudDeletePlant(x.id);renderAdminPlants();refreshConfigUI()}
+function pick(row,names){for(let k of Object.keys(row)){let nk=norm(k).replace(/[^A-Z0-9]/g,"");if(names.some(n=>nk.includes(n)))return row[k]}return ""}
+function normalizeImported(rows){return rows.map(r=>{let id=pick(r,["SEDETECNICA","IDENTIFICATIVO","ID","CODICESEDE"]);return {id:String(id||"").trim(),definition:String(pick(r,["DEFINIZIONE","DESCRIZIONE"])||"").trim(),localita:String(pick(r,["LOCALITA","TRATTA"])||"").trim(),nucleo:String(pick(r,["NUCLEO"])||"").trim(),kmI:pick(r,["KMINIZIO","KMI"]),kmF:pick(r,["KMFINE","KMF"]),stato:String(pick(r,["STATO"])||"ESER").trim(),codice:String(pick(r,["CODICE"])||"").trim()}}).filter(x=>x.id)}
+async function importRegistry(){
+  const f=$("importFile").files[0];
+  if(!f){alert("Seleziona il file Excel di importazione.");return}
+
+  let rows=[];
+  if(/\.csv$/i.test(f.name)){
+    const txt=await f.text();
+    const first=txt.split("\n")[0]||"";
+    const sep=(first.match(/;/g)||[]).length>(first.match(/,/g)||[]).length?";":",";
+    const lines=txt.split(/\r?\n/).filter(Boolean);
+    const heads=(lines.shift()||"").split(sep).map(x=>x.replace(/^"|"$/g,"").trim());
+    rows=lines.map(l=>{
+      const a=l.split(sep).map(x=>x.replace(/^"|"$/g,"").trim());
+      const o={}; heads.forEach((h,i)=>o[h]=a[i]||""); return o;
+    });
+  }else{
+    if(typeof XLSX==="undefined"){
+      alert("Per importare Excel serve una connessione internet per caricare la libreria XLSX.");
+      return;
+    }
+    const ab=await f.arrayBuffer();
+    const wb=XLSX.read(ab,{cellFormula:true,cellDates:true});
+    const sheetName=wb.SheetNames.find(n=>norm(n)==="IMPORTAZIONE");
+    if(!sheetName){
+      alert('Il file Excel deve contenere un foglio chiamato "IMPORTAZIONE". Gli altri fogli, come MAPPATURA_SEDI e ISTRUZIONI, vengono ignorati.');
+      return;
+    }
+    const ws=wb.Sheets[sheetName];
+    rows=XLSX.utils.sheet_to_json(ws,{defval:"",raw:false});
+  }
+
+  const validRows=rows.filter(r=>String(pick(r,["SEDETECNICA","IDENTIFICATIVO","ID","CODICESEDE"])||"").trim());
+  if(!validRows.length){alert("Nessuna riga valida trovata nel foglio IMPORTAZIONE.");return}
+
+  const badRows=validRows.filter(r=>{
+    const id=String(pick(r,["SEDETECNICA","IDENTIFICATIVO","ID","CODICESEDE"])||"").trim();
+    const nucleo=String(pick(r,["NUCLEO"])||"").trim();
+    const localita=String(pick(r,["LOCALITA","TRATTA"])||"").trim();
+    const esito=String(pick(r,["ESITOASSOCIAZIONE"])||"").trim();
+    return !!id && (
+      !nucleo || !localita ||
+      norm(nucleo)==="DA ASSEGNARE" ||
+      norm(localita)==="DA ASSEGNARE" ||
+      norm(esito)==="MAPPATURA MANCANTE"
+    );
+  });
+
+  if(badRows.length){
+    const esempi=badRows.slice(0,8).map(r=>String(pick(r,["SEDETECNICA","IDENTIFICATIVO","ID","CODICESEDE"])||"").trim()).filter(Boolean);
+    alert(
+      `Importazione bloccata: ${badRows.length} riga/e non hanno una mappatura valida Sede 1° livello → Nucleo / Località.\n\n`+
+      (esempi.length?`Esempi: ${esempi.join(", ")}${badRows.length>esempi.length?" ...":""}\n\n`:"")+
+      `Completa il foglio MAPPATURA_SEDI, salva l'Excel e riprova. Nessun dato è stato importato.`
+    );
+    return;
+  }
+
+  const imp=normalizeImported(validRows);
+  if(!imp.length){alert("Nessuna riga riconosciuta. Verifica le intestazioni del foglio IMPORTAZIONE.");return}
+
+  let added=0,updated=0;
+  for(const x of imp){
+    const j=MASTER.findIndex(y=>norm(y.id)===norm(x.id));
+    if(j>=0){let old=MASTER[j],saved=db[old.id]||{};if(kmMissing(x.kmI)&&!kmMissing(old.kmI))x.kmI=old.kmI;if(kmMissing(x.kmF)&&!kmMissing(old.kmF))x.kmF=old.kmF;if(kmMissing(x.kmI)&&!kmMissing(saved.kmI))x.kmI=saved.kmI;if(kmMissing(x.kmF)&&!kmMissing(saved.kmF))x.kmF=saved.kmF;MASTER[j]={...old,...x};updated++}
+    else{MASTER.push(x);added++}
+    if(x.nucleo&&!config.nuclei.some(n=>norm(n)===norm(x.nucleo)))config.nuclei.push(x.nucleo);
+  }
+
+  await persistAll();
+  renderNuclei(); renderAdminPlants(); refreshConfigUI();
+  alert(`Importazione completata: ${added} nuovi, ${updated} aggiornati. Le verifiche esistenti sono state conservate.`);
+}
+function downloadTemplate(){let csv='Sede tecnica;Definizione;Località / Tratta;Nucleo;Km inizio;Km fine;Stato;Codice\nLO0000-CS-SZ01;Complesso Sezionatore TE N°1;LOCALITA;NUCLEO;0,000;0,000;ESER;LO0000\n';let b=new Blob([csv],{type:'text/csv;charset=utf-8'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='Modello_Import_Sezionatori.csv';a.click();URL.revokeObjectURL(a.href)}
+
+
+function personRow(p,i){
+  const opts=(config.nuclei||[]).map(n=>`<option ${norm(n)===norm(p.nucleo)?"selected":""}>${esc(n)}</option>`).join("");
+  return `<tr data-pi="${i}"><td><input data-pk="cognome" value="${esc(p.cognome||"")}"></td><td><input data-pk="nome" value="${esc(p.nome||"")}"></td><td><input data-pk="qualifica" value="${esc(p.qualifica||"")}"></td><td><input data-pk="cid" value="${esc(p.cid||"")}"></td><td><input data-pk="telefono" value="${esc(p.telefono||"")}"></td><td><input data-pk="email" type="email" value="${esc(p.email||"")}"></td><td><select data-pk="nucleo"><option></option>${opts}</select></td><td class="checkcell"><input type="checkbox" data-pk="abilitatoPP" ${p.abilitatoPP===false?"":"checked"}></td><td class="checkcell"><input type="checkbox" data-pk="preposto" ${p.preposto?"checked":""}></td><td class="checkcell"><input type="checkbox" data-pk="attivo" ${p.attivo===false?"":"checked"}></td><td><button class="admin-btn" onclick="savePersonRow(${i})">SALVA</button> <button class="admin-btn danger" onclick="deletePerson(${i})">ELIMINA</button></td></tr>`;
+}
+function renderPersonnel(){
+  const body=$("personRows"); if(!body)return;
+  const q=norm($("personSearch")?.value||"");
+  const arr=personnel.map((p,i)=>({p,i})).filter(o=>!q||norm([o.p.cognome,o.p.nome,o.p.qualifica,o.p.cid,o.p.telefono,o.p.email,o.p.nucleo].join(" ")).includes(q));
+  body.innerHTML=arr.map(o=>personRow(o.p,o.i)).join("");
+}
+function newPersonRow(){personnel.unshift({id:"P"+Date.now(),cognome:"",nome:"",qualifica:"",cid:"",telefono:"",email:"",nucleo:config.nuclei[0]||"",abilitatoPP:true,preposto:false,attivo:true});renderPersonnel();}
+async function savePersonRow(i){
+  const tr=document.querySelector(`tr[data-pi="${i}"]`); if(!tr)return;
+  const p={...personnel[i]}; tr.querySelectorAll("[data-pk]").forEach(el=>p[el.dataset.pk]=el.type==="checkbox"?el.checked:el.value.trim());
+  if(!p.cognome&&!p.nome){alert("Inserisci almeno nome o cognome.");return;}
+  if(p.cid&&personnel.some((x,j)=>j!==i&&norm(x.cid)===norm(p.cid))){alert("Esiste già una persona con questo CID.");return;}
+  personnel[i]=p; await persistAll(); renderPersonnel(); alert("Anagrafica personale salvata.");
+}
+async function deletePerson(i){const p=personnel[i];if(!confirm(`Eliminare definitivamente ${p.cognome||""} ${p.nome||""}?`))return;personnel.splice(i,1);await persistAll();renderPersonnel();}
+function downloadPersonnelTemplate(){const csv='COGNOME;NOME;QUALIFICA;CID;TELEFONO;EMAIL;NUCLEO;ABILITATO PP;PREPOSTO EMERGENZE;ATTIVO\nROSSI;MARIO;OSMI;123456;3138000000;m.rossi@rfi.it;Gallarate;SI;SI;SI\n';const b=new Blob([csv],{type:'text/csv;charset=utf-8'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='Modello_Personale_PP.csv';a.click();URL.revokeObjectURL(a.href);}
+async function importPersonnel(){
+  const f=$("personImportFile")?.files?.[0]; if(!f){alert("Seleziona il file del personale.");return;}
+  let rows=[];
+  if(/\.csv$/i.test(f.name)){const txt=await f.text();const sep=((txt.split("\n")[0]||"").match(/;/g)||[]).length>=((txt.split("\n")[0]||"").match(/,/g)||[]).length?";":",";const lines=txt.split(/\r?\n/).filter(Boolean);const h=(lines.shift()||"").split(sep).map(x=>x.replace(/^"|"$/g,"").trim());rows=lines.map(l=>{const a=l.split(sep).map(x=>x.replace(/^"|"$/g,"").trim()),o={};h.forEach((k,i)=>o[k]=a[i]||"");return o;});}
+  else{
+    if(typeof XLSX==="undefined"){alert("Libreria Excel non disponibile.");return;}
+    const wb=XLSX.read(await f.arrayBuffer(),{cellDates:true});
+    const sn=wb.SheetNames.find(n=>["PERSONALE_PP","PERSONALE"].includes(norm(n)))||wb.SheetNames[0];
+    const ws=wb.Sheets[sn];
+    const matrix=XLSX.utils.sheet_to_json(ws,{header:1,defval:"",raw:false});
+    const hi=matrix.findIndex(row=>row.some(v=>norm(v)==="COGNOME") && row.some(v=>norm(v)==="NOME") && row.some(v=>norm(v)==="CID"));
+    if(hi<0){alert('File personale non riconosciuto: non trovo la riga intestazioni COGNOME / NOME / CID.');return;}
+    const headers=matrix[hi].map(v=>String(v||"").trim());
+    rows=matrix.slice(hi+1).filter(row=>row.some(v=>String(v||"").trim())).map(row=>{const o={};headers.forEach((h,i)=>{if(h)o[h]=row[i]??"";});return o;});
+  }
+  const imp=rows.filter(r=>String(r.COGNOME||r.NOME||r.CID||"").trim()).map((r,i)=>({id:"P"+Date.now()+"_"+i,cognome:String(r.COGNOME||"").trim(),nome:String(r.NOME||"").trim(),qualifica:String(r.QUALIFICA||"").trim(),cid:String(r.CID||"").trim(),telefono:String(r.TELEFONO||"").trim(),email:String(r.EMAIL||"").trim(),nucleo:String(r.NUCLEO||"").trim(),abilitatoPP:norm(r["ABILITATO PP"]||r["PES"])!=="NO",preposto:norm(r["PREPOSTO EMERGENZE"])==="SI",attivo:norm(r.ATTIVO)!=="NO"}));
+  if(!imp.length){alert("Nessuna persona valida trovata.");return;}
+  let add=0,upd=0;for(const p of imp){const j=p.cid?personnel.findIndex(x=>norm(x.cid)===norm(p.cid)):-1;if(j>=0){personnel[j]={...personnel[j],...p,id:personnel[j].id};upd++;}else{personnel.push(p);add++;}if(p.nucleo&&!config.nuclei.some(n=>norm(n)===norm(p.nucleo)))config.nuclei.push(p.nucleo);}
+  await persistAll();renderNuclei();renderPersonnel();$("personImportFile").value="";alert(`Importazione personale completata: ${add} nuovi, ${upd} aggiornati.`);
+}
+const PP_TEMPLATE_FILE="Modulo PP -.pdf";
+async function installPPTemplate(){
+  if(currentUserRole!=="admin"||!adminAuthenticated){
+    alert("Accesso riservato agli amministratori.");
+    return;
+  }
+  const f=$("ppTemplateFile")?.files?.[0];
+  if(!f){alert("Seleziona il PDF Modulo PP normalizzato.");return;}
+  if(!/\.pdf$/i.test(f.name)){alert("Seleziona un file PDF.");return;}
+  try{
+    const ab=await f.arrayBuffer();
+    if(typeof PDFLib!=="undefined"){
+      try{await PDFLib.PDFDocument.load(ab);}
+      catch(e){
+        if(String(e?.message||e).toLowerCase().includes("encrypt")){
+          alert("Questo PDF è ancora protetto/cifrato. Seleziona il modello PP normalizzato/non protetto.");
+          return;
+        }
+        throw e;
+      }
+    }
+    const safe=PP_TEMPLATE_FILE.split("/").map(encodeURIComponent).join("/");
+    await cloudFetch(`/storage/v1/object/umte-docs/${safe}`,{
+      method:"POST",
+      headers:{"Content-Type":"application/pdf","x-upsert":"true"},
+      body:f
+    });
+    $("ppTemplateFile").value="";
+    await checkPPTemplate();
+    alert("Template PP installato nell'archivio centrale.");
+  }catch(e){
+    alert("Installazione template non riuscita: "+(e?.message||e));
+  }
+}
+async function setPPLastProgressive(){if(!adminAuthenticated)return;const n=Math.max(0,parseInt($("ppLastProgressiveAdmin").value||"0",10)||0);if(!confirm(`Impostare ${n} come ultimo progressivo PP già utilizzato per questa UM? Il prossimo proposto sarà ${n+1}.`))return;ppLastProgressive=n;await persistAll();renderPP();alert("Progressivo PP aggiornato.");}
+async function checkPPTemplate(){
+  const el=$("ppTemplateStatus");
+  if(!el)return;
+  try{
+    const u=await privateDocUrl(PP_TEMPLATE_FILE);
+    const r=await fetch(u,{method:"HEAD"});
+    if(!r.ok)throw new Error("Template non disponibile");
+    const len=Number(r.headers.get("content-length")||0);
+    el.textContent=len?`PRESENTE - ${Math.round(len/1024)} KB`:"PRESENTE NELL'ARCHIVIO CENTRALE";
+    el.style.color="#0b6c2a";
+  }catch(e){
+    el.textContent="MANCANTE NELL'ARCHIVIO CENTRALE";
+    el.style.color="#a20008";
+  }
+}
+let ppSelected=new Set();
+let ppRISelected={};
+function activePPPeople(){return personnel.filter(p=>p.attivo!==false&&p.abilitatoPP!==false).sort((a,b)=>(a.cognome+" "+a.nome).localeCompare(b.cognome+" "+b.nome));}
+function filteredPPPeople(extraIds=[]){
+  const q=norm($("ppPersonSearch")?.value||""), nuc=norm($("ppPersonNucleo")?.value||"");
+  const extra=new Set((extraIds||[]).filter(Boolean));
+  return activePPPeople().filter(p=>extra.has(p.id)||((!nuc||norm(p.nucleo)===nuc)&&(!q||norm([p.cognome,p.nome,p.qualifica,p.cid,p.email,p.nucleo].join(" ")).includes(q))));
+}
+function personLabel(p){return `${(p.cognome+" "+p.nome).trim()}${p.qualifica?" - "+p.qualifica:""}${p.cid?" - CID "+p.cid:""}${p.nucleo?" - "+p.nucleo:""}`;}
+function refreshPPPersonnelFilter(){
+  const el=$("ppPersonNucleo"); if(!el)return; const v=el.value;
+  const nuclei=[...new Set(activePPPeople().map(p=>p.nucleo).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
+  el.innerHTML='<option value="">Tutti i nuclei</option>'+nuclei.map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join("");
+  el.value=nuclei.includes(v)?v:"";
+}
+function renderPPPersonnelSelectors(){
+  refreshPPPersonnelFilter();
+  const ids=[$("ppCompilato")?.value,$("ppVerificato")?.value,$("ppRP")?.value,...Object.values(ppRISelected||{})];
+  const ppl=filteredPPPeople(ids);
+  [["ppCompilato","Seleziona chi compila"],["ppVerificato","Seleziona chi verifica"],["ppRP","Seleziona RP"]].forEach(([id,ph])=>{const el=$(id);if(!el)return;const v=el.value;el.innerHTML=`<option value="">${ph}</option>`+ppl.map(p=>`<option value="${esc(p.id)}">${esc(personLabel(p))}</option>`).join("");el.value=v;});
+  const pres=personnel.filter(p=>p.attivo!==false&&p.preposto),ps=$("ppPreposto");if(ps){const pv=ps.value;ps.innerHTML='<option value="">Seleziona preposto</option>'+pres.map(p=>`<option value="${esc(p.id)}">${esc(personLabel(p))}</option>`).join("");ps.value=pv;}
+  renderPPRIList();renderPPSummary();
+}
+function personInitials(p){const parts=[p?.nome||"",p?.cognome||""].filter(Boolean);return parts.map(x=>String(x).trim().charAt(0).toUpperCase()).join("");}
+function renderPP(){
+  $("ppNumber").value=String((ppLastProgressive||0)+1);
+  if(!$("ppUnitaEmittente").value)$("ppUnitaEmittente").value=config.umId||"";
+  if(!$("ppUnitaConsegnataria").value)$("ppUnitaConsegnataria").value=config.umId||"";
+  refreshPPPersonnelFilter();
+  renderPPPersonnelSelectors();
+  renderPPPlants();renderPPRIList();renderPPSummary();renderPPRegister();
+}
+function renderPPRIList(){const box=$("ppRIList");if(!box)return;const ppl=filteredPPPeople(Object.values(ppRISelected||{})),plants=selectedPPPlants();if(!plants.length){box.innerHTML='<div class="muted">Seleziona prima almeno un elemento d’impianto.</div>';return;}box.innerHTML=plants.map((x,i)=>{const cur=ppRISelected[x.id]||"";return `<div style="display:grid;grid-template-columns:minmax(190px,1fr) minmax(260px,2fr);gap:8px;align-items:center;margin:6px 0"><div><b>${String.fromCharCode(65+i)} - ${esc(x.id)}</b><br><span class="muted">${esc(x.localita||x.definition||"")}</span></div><select onchange="ppRISelected['${esc(x.id)}']=this.value;renderPPSummary()" style="width:100%;padding:9px;border:1px solid #b9c7d8;border-radius:8px"><option value="">Seleziona RI PES</option>${ppl.map(p=>`<option value="${esc(p.id)}" ${p.id===cur?"selected":""}>${esc(personLabel(p))}</option>`).join("")}</select></div>`;}).join("");}
+
+function renderPPPlants(){const box=$("ppPlants");if(!box)return;const q=norm($("ppPlantSearch")?.value||"");const arr=MASTER.filter(x=>norm(x.stato)!=="DISATTIVATO").filter(x=>!q||norm([x.id,x.localita,x.nucleo,x.definition].join(" ")).includes(q));box.innerHTML=arr.map(x=>`<label class="pp-select-row"><input type="checkbox" ${ppSelected.has(x.id)?"checked":""} onchange="togglePPPlant('${esc(x.id)}',this.checked)"><span><b>${esc(x.id)}</b><br><span class="muted">${esc(x.definition||"")}</span></span><span>${esc(x.localita||"")}</span><span>${esc(x.nucleo||"")}</span></label>`).join("");}
+function togglePPPlant(id,on){if(on&&ppSelected.size>=4&&!ppSelected.has(id)){alert("Il modello PP prevede 4 elementi A-D per documento. Genera un secondo PP per ulteriori sezionatori.");renderPPPlants();return;}if(on)ppSelected.add(id);else ppSelected.delete(id);renderPPRIList();renderPPSummary();}
+function selectedPPPlants(){return [...ppSelected].map(id=>MASTER.find(x=>x.id===id)).filter(Boolean);}
+function renderPPSummary(){const plants=selectedPPPlants(),rp=personnel.find(p=>p.id===$("ppRP")?.value),co=personnel.find(p=>p.id===$("ppCompilato")?.value),ve=personnel.find(p=>p.id===$("ppVerificato")?.value);const ris=plants.map(x=>{const p=personnel.find(q=>q.id===ppRISelected[x.id]);return `${esc(x.id)}: ${p?esc((p.cognome+" "+p.nome).trim()):"RI da selezionare"}`;}).join(" · ");$("ppSummary").innerHTML=`<b>${plants.length}/4 elementi selezionati</b>${plants.length?" - "+plants.map(x=>esc(x.id)).join(" · "):""}<br>Compilato da: ${co?esc((co.cognome+" "+co.nome).trim())+" (sigla "+esc(personInitials(co))+")":"da selezionare"} · Verificato da: ${ve?esc((ve.cognome+" "+ve.nome).trim()):"da selezionare"}<br>RP: ${rp?esc((rp.cognome+" "+rp.nome).trim())+(rp.qualifica?" - "+esc(rp.qualifica):"")+" - CID "+esc(rp.cid||"-")+" - Tel. "+esc(rp.telefono||"-"):"da selezionare"}${ris?"<br>RI: "+ris:""}`;}
+function renderPPRegister(){const body=$("ppRegisterBody");if(!body)return;const arr=[...ppRegister].sort((a,b)=>Number(b.number||0)-Number(a.number||0));body.innerHTML=arr.length?arr.map(r=>`<tr><td><b>${esc(r.number||"")}</b></td><td>${esc(r.generatedAt?new Date(r.generatedAt).toLocaleString("it-IT"):"")}</td><td>${esc(r.period||"")}</td><td style="white-space:normal">${esc((r.plants||[]).join(" · "))}</td><td>${esc(r.rp||"")}</td><td>${r.payload?`<button class="btn secondary" onclick="regeneratePP('${esc(r.number)}')">RIGENERA PDF</button>`:`<span class="muted">Dati completi non disponibili</span>`}</td></tr>`).join(""):'<tr><td colspan="6" class="muted">Nessun PP ancora registrato.</td></tr>';}
+function autofillPPTexts(){
+  const plants=selectedPPPlants();if(!plants.length){alert("Seleziona almeno un sezionatore.");return;}
+  const refs=[...new Set(plants.flatMap(x=>{const old=current;current=x;const r=docsForCurrent();current=old;return r;}))];
+  $("ppObjective").value=`Esecuzione delle verifiche funzionali previste dai cicli di manutenzione TE applicabili ai sezionatori selezionati (${refs.join(", ")}).`;
+  $("ppPrep").value="Predisposizione degli elementi d'impianto per l'esecuzione delle prove secondo il Piano di Lavoro e le disposizioni operative applicabili.";
+  $("ppTests").value="Verifica funzionale di apertura/chiusura e dei dispositivi di comando, controllo, posizione e segnalazione previsti per la tipologia degli elementi selezionati, con riscontro dello stato dei componenti oggetto del censimento.";
+  $("ppMoves").value="Manovre di apertura e chiusura dei sezionatori interessati, richieste nel corso delle prove secondo le modalità operative concordate.";
+  $("ppRestore").value="Ripristino dell'assetto previsto a conclusione delle prove e restituzione degli elementi d'impianto secondo le procedure applicabili.";
+  $("ppSite").value=`Prove su ${plants.length} elemento/i TE: ${plants.map(x=>x.id+" - "+(x.localita||x.definition||"")).join("; ")}.`;
+  $("ppRisks").value="Rischi connessi alle manovre e alle prove sugli impianti TE, alla presenza di parti elettriche e all'ambiente ferroviario, come individuati nella documentazione di sicurezza e nei documenti operativi applicabili.";
+  $("ppProtection").value="Adozione delle misure di protezione previste dal Piano di Lavoro, dalla procedura RFI DTC P SL 03 1 e dai documenti operativi applicabili.";
+}
+function formatPPDate(v){if(!v)return {date:"",time:""};const d=new Date(v);return {date:String(d.getDate()).padStart(2,"0")+"/"+String(d.getMonth()+1).padStart(2,"0")+"/"+d.getFullYear(),time:String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0")};}
+async function loadPPTemplateBytes(){
+  const u=await privateDocUrl(PP_TEMPLATE_FILE);
+  const r=await fetch(u);
+  if(!r.ok)throw new Error("Template PP non disponibile nell'archivio centrale.");
+  return await r.arrayBuffer();
+}
+function buildPPPayload(number){
+  const plants=selectedPPPlants();
+  const rp=personnel.find(p=>p.id===$("ppRP").value);
+  const pre=personnel.find(p=>p.id===$("ppPreposto").value);
+  const compilato=personnel.find(p=>p.id===$("ppCompilato").value);
+  const verificato=personnel.find(p=>p.id===$("ppVerificato").value);
+  const snap=p=>p?{id:p.id,cognome:p.cognome||"",nome:p.nome||"",cid:p.cid||"",telefono:p.telefono||"",nucleo:p.nucleo||""}:null;
+  return {
+    number:String(number), createdAt:new Date().toISOString(),
+    unitaConsegnataria:$("ppUnitaConsegnataria").value||"", unitaEmittente:$("ppUnitaEmittente").value||"", pdl:$("ppPdl").value||"",
+    objective:$("ppObjective").value||"", from:$("ppFrom").value||"", to:$("ppTo").value||"",
+    config:$("ppConfig").value||"", prep:$("ppPrep").value||"", tests:$("ppTests").value||"", moves:$("ppMoves").value||"", intermediate:$("ppIntermediate").value||"", restore:$("ppRestore").value||"",
+    site:$("ppSite").value||"", risks:$("ppRisks").value||"", protection:$("ppProtection").value||"", notes:$("ppNotes").value||"",
+    compilato:snap(compilato), verificato:snap(verificato), emittenteSigla:personInitials(compilato),
+    rp:snap(rp), preposto:snap(pre),
+    plants:plants.map(x=>({id:x.id,definition:x.definition||"",localita:x.localita||"",nucleo:x.nucleo||"",kmI:x.kmI??"",kmF:x.kmF??"",stato:x.stato||"",sistema:state(x).sistema||inferSystem(x,state(x)),azionamento:state(x).azionamento||inferActuation(state(x),x)||"",ri:snap(personnel.find(p=>p.id===ppRISelected[x.id]))}))
+  };
+}
+async function makePPBlob(payload){
+  const bytes=await loadPPTemplateBytes(),pdf=await PDFLib.PDFDocument.load(bytes),form=pdf.getForm();
+  const set=(name,val)=>{try{form.getTextField(name).setText(String(val??""));}catch(e){}};
+  const chk=(name)=>{try{form.getCheckBox(name).check();}catch(e){}};
+  set("UNITA CONSEGNATARIA",payload.unitaConsegnataria);set("UNITA EMITTENTE",payload.unitaEmittente);set("Piani di Lavoro di riferimento n",payload.pdl);set("numero",payload.number);set("obbiettivo",payload.objective);
+  const created=new Date(payload.createdAt||Date.now()),createdDate=created.toLocaleDateString("it-IT");
+  const full=p=>((p?.cognome||"")+" "+(p?.nome||"")).trim();
+  const compilato=payload.compilato||{},verificato=payload.verificato||{};
+  set("Piani di Lavoro di riferimento nRow1",full(compilato));set("Piani di Lavoro di riferimento nRow1_2",payload.unitaEmittente||compilato.nucleo||"");set("undefined_2",createdDate);
+  set("Piani di Lavoro di riferimento nRow2",full(verificato));set("Piani di Lavoro di riferimento nRow2_2",payload.unitaEmittente||verificato.nucleo||"");set("undefined_21",createdDate);
+  const rp=payload.rp||{};set("Nome",full(rp));set("Tel",rp.telefono||"");set("data",payload.unitaEmittente||rp.nucleo||"");chk("undefined_4");
+  const den=["A","B","C","D"],kv=["kVRow1","kVB","kVC","kVD"],cod=["CodiceRow1","CodiceB","CodiceC","CodiceD"],rin=["Nome_2","Nome_3","Nome_4","Nome_5"],rid=["del","del_2","del_3","del_4"],rit=["Tel_2","Tel_3","Tel_4","Tel_5"];
+  (payload.plants||[]).slice(0,4).forEach((x,i)=>{set(den[i],x.definition||x.localita||x.id);set(kv[i],String(x.sistema||"").startsWith("15")?"15":"3");set(cod[i],x.id);const ri=x.ri||{};set(rin[i],full(ri));set(rid[i],payload.unitaEmittente||ri.nucleo||"");set(rit[i],ri.telefono||"");});
+  const fr=formatPPDate(payload.from),to=formatPPDate(payload.to);set("Dalle ore",fr.time);set("del_5",fr.date);set("Alle ore",to.time);set("del_6",to.date);
+  ["A_2","B_2","C_2","D_2"].forEach((n,i)=>set(n,(payload.plants||[])[i]?payload.config:""));
+  set("a Attività lavorative di predisposizione di provaRow1",payload.prep);set("b ProveRow1",payload.tests);set("c Specificazione delle manovre che potranno essere richieste nel corso delle proveRow1",payload.moves);set("d Attività lavorative intermedie di predisposizione per prove eventualiRow1",payload.intermediate);set("e Attività lavorative di ripristino a fine proveRow1",payload.restore);
+  set("ORGANIZZAZIONE CANTIERE descrizione prove schemi ed eventuali procedureRow1",payload.site);set("RISCHI DOVUTI ALLE PROVE individuazione ATTENZIONE LA LINEA AT EVENTUALMENTE UTILIZZATA PER LE PROVE È DA CONSIDERARSI SOTTOPOSTA A TENSIONE PERICOLOSA E PERTANO NON SONO CONSENTITE SU DI ESSA ALTRE ATTIVITÀRow1",payload.risks);set("MISURE DI PROTEZIONE ADOTTATE CONTRO I RISCHI DOVUTI ALLE PROVERow1",payload.protection);set("NOTERow1",payload.notes);set("NOTERow1_2",payload.notes);
+  const pre=payload.preposto||{};if(pre.cognome||pre.nome)set("NOMINATIVO PREPOSTO PER GLI INTERVENTI DI EMERGENZA",((pre.cognome||"")+" "+(pre.nome||"")).trim()+(pre.telefono?" - Tel. "+pre.telefono:""));
+  // Campi non AcroForm del modello ufficiale: numero PP nelle intestazioni pag. 2-3 e sigla dell'emittente nelle pag. 1-2. Le firme restano volutamente vuote.
+  const pages=pdf.getPages(),font=await pdf.embedFont(PDFLib.StandardFonts.Helvetica);
+  const drawCentered=(page,text,x1,x2,y,size=9)=>{text=String(text||"");if(!text)return;const w=font.widthOfTextAtSize(text,size);page.drawText(text,{x:x1+Math.max(0,(x2-x1-w)/2),y,size,font});};
+  if(pages[0])drawCentered(pages[0],payload.emittenteSigla||"",445,585,43,8.5);
+  if(pages[1])drawCentered(pages[1],payload.emittenteSigla||"",445,585,43,8.5);
+  // Il campo AcroForm "numero" ha widget sulle tre pagine: non disegniamo copie manuali, che causavano il numero fuori posizione a pag. 3.
+  // Dimensioni carattere controllate: il template ufficiale usa campi molto grandi e, senza un font-size esplicito,
+  // pdf-lib può generare testi sproporzionati nei campi multilinea.
+  const fontSizes={
+    "UNITA CONSEGNATARIA":8,"UNITA EMITTENTE":8,"Piani di Lavoro di riferimento n":8,"numero":9,"obbiettivo":9,
+    "Piani di Lavoro di riferimento nRow1":8,"Piani di Lavoro di riferimento nRow1_2":8,"undefined_2":8,
+    "Piani di Lavoro di riferimento nRow2":8,"Piani di Lavoro di riferimento nRow2_2":8,"undefined_21":8,
+    "Nome":7,"Tel":7,"data":8,
+    "A":7,"B":7,"C":7,"D":7,"kVRow1":8,"kVB":8,"kVC":8,"kVD":8,
+    "CodiceRow1":4.2,"CodiceB":4.2,"CodiceC":4.2,"CodiceD":4.2,
+    "Nome_2":6.5,"Nome_3":6.5,"Nome_4":6.5,"Nome_5":6.5,
+    "del":6.5,"del_2":6.5,"del_3":6.5,"del_4":6.5,"Tel_2":6.5,"Tel_3":6.5,"Tel_4":6.5,"Tel_5":6.5,
+    "Dalle ore":8,"del_5":8,"Alle ore":8,"del_6":8,
+    "A_2":7.5,"B_2":7.5,"C_2":7.5,"D_2":7.5,
+    "a Attività lavorative di predisposizione di provaRow1":9,
+    "b ProveRow1":9,
+    "c Specificazione delle manovre che potranno essere richieste nel corso delle proveRow1":9,
+    "d Attività lavorative intermedie di predisposizione per prove eventualiRow1":9,
+    "e Attività lavorative di ripristino a fine proveRow1":9,
+    "ORGANIZZAZIONE CANTIERE descrizione prove schemi ed eventuali procedureRow1":8.5,
+    "RISCHI DOVUTI ALLE PROVE individuazione ATTENZIONE LA LINEA AT EVENTUALMENTE UTILIZZATA PER LE PROVE È DA CONSIDERARSI SOTTOPOSTA A TENSIONE PERICOLOSA E PERTANO NON SONO CONSENTITE SU DI ESSA ALTRE ATTIVITÀRow1":8.5,
+    "MISURE DI PROTEZIONE ADOTTATE CONTRO I RISCHI DOVUTI ALLE PROVERow1":8.5,
+    "NOTERow1":8.5,"NOTERow1_2":8.5,"NOMINATIVO PREPOSTO PER GLI INTERVENTI DI EMERGENZA":7.5
+  };
+  Object.entries(fontSizes).forEach(([n,sz])=>{try{form.getTextField(n).setFontSize(sz);}catch(e){}});
+
+  // Rigeneriamo le appearance e appiattiamo il modulo: i dati diventano parte grafica del PDF e risultano visibili in Acrobat e negli altri viewer.
+  form.updateFieldAppearances(font);
+  form.flatten();
+
+  // Nel modulo ufficiale il campo AcroForm "Nome" è condiviso tra il nome RP di pag.1 e la casella FIRMA RP di pag.3.
+  // Dopo il flatten cancelliamo SOLO il contenuto grafico della casella firma, lasciando il bordo e mantenendo la firma volutamente vuota.
+  if(pages[2]){
+    pages[2].drawRectangle({x:298.4,y:390.9,width:62.5,height:9.5,color:PDFLib.rgb(1,1,1)});
+  }
+  const out=await pdf.save();return new Blob([out],{type:"application/pdf"});
+}
+function downloadPPBlob(blob,number){const safeNum=String(number).replace(/[^A-Za-z0-9_-]+/g,"_");const fileName=`PP_${safeNum}_${(config.umId||"UMTE").replace(/[^A-Za-z0-9_-]+/g,"_")}.pdf`;const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=fileName;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1500);return fileName;}
+async function generatePPPDF(){
+  const plants=selectedPPPlants(),rp=personnel.find(p=>p.id===$("ppRP").value),compilato=personnel.find(p=>p.id===$("ppCompilato").value),verificato=personnel.find(p=>p.id===$("ppVerificato").value);if(!plants.length){alert("Seleziona almeno un sezionatore.");return;}if(!compilato){alert("Seleziona chi ha compilato il PP.");return;}if(!verificato){alert("Seleziona chi ha verificato il PP.");return;}if(!rp){alert("Seleziona il Responsabile delle Prove.");return;}const missingRI=plants.filter(x=>!ppRISelected[x.id]||!personnel.find(p=>p.id===ppRISelected[x.id]));if(missingRI.length){alert("Seleziona il RI per tutti gli elementi: "+missingRI.map(x=>x.id).join(", "));return;}if(typeof PDFLib==="undefined"){alert("Libreria PDF non disponibile. Verifica la connessione internet e ricarica la pagina.");return;}
+  const number=String((ppLastProgressive||0)+1);$("ppNumber").value=number;
+  if(ppRegister.some(r=>norm(r.number)===norm(number))){alert("Incongruenza nel registro PP: il progressivo "+number+" risulta già utilizzato. Verifica il registro prima di proseguire.");return;}
+  try{const payload=buildPPPayload(number),blob=await makePPBlob(payload),fileName=downloadPPBlob(blob,number);ppLastProgressive=Number(number);const fr=formatPPDate(payload.from),to=formatPPDate(payload.to);ppRegister.push({number,generatedAt:payload.createdAt,period:[fr.date,fr.time,to.date,to.time].filter(Boolean).join(" "),plants:payload.plants.map(x=>x.id),rp:((payload.rp.cognome||"")+" "+(payload.rp.nome||"")).trim(),rpCid:payload.rp.cid||"",fileName,payload});await persistAll();$("ppNumber").value=String(ppLastProgressive+1);renderPPRegister();alert(`PP ${number} generato e registrato. I dati completi sono conservati nell'Archivio Sezionatori e il PDF può essere rigenerato dal registro.`);}catch(e){console.error(e);alert("Generazione PP non riuscita: "+(e?.message||e)+". Verifica che il template PDF sia installato nell'Archivio Sezionatori.");}
+}
+async function regeneratePP(number){
+  const rec=ppRegister.find(r=>String(r.number)===String(number));if(!rec||!rec.payload){alert("Per questo PP non sono disponibili i dati completi necessari alla rigenerazione.");return;}if(typeof PDFLib==="undefined"){alert("Libreria PDF non disponibile.");return;}
+  try{const blob=await makePPBlob(rec.payload);downloadPPBlob(blob,rec.number);}catch(e){console.error(e);alert("Rigenerazione PP non riuscita: "+(e?.message||e));}
+}
+
+
+// Filtri elenco sezionatori: aggiornamento immediato su ricerca e selezioni.
+["q","nf","pf","cf","kmf","duf"].forEach(id=>{
+  const el=$(id);
+  if(!el)return;
+  el.addEventListener(id==="q" ? "input" : "change", renderList);
+});
+
+setArchiveUI("boot");
+refreshConfigUI();
+renderDash();
+initCloudApp();
+if("serviceWorker" in navigator && location.protocol.startsWith("http")){window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));}
+</script></body></html>
