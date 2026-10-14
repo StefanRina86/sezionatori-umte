@@ -1121,6 +1121,14 @@ async function regeneratePP(number){
   try{const blob=await makePPBlob(rec.payload);downloadPPBlob(blob,rec.number);}catch(e){console.error(e);alert("Rigenerazione PP non riuscita: "+(e?.message||e));}
 }
 
+
+// Filtri elenco sezionatori: aggiornamento immediato su ricerca e selezioni.
+["q","nf","pf","cf","kmf","duf"].forEach(id=>{
+  const el=$(id);
+  if(!el)return;
+  el.addEventListener(id==="q" ? "input" : "change", renderList);
+});
+
 setArchiveUI("boot");
 refreshConfigUI();
 renderDash();
