@@ -148,6 +148,11 @@ main{padding:18px;min-width:0}.hidden{display:none!important}.grid{display:grid;
 
 
 #mobileAdminBtn,#topAdminBtn{display:none}
+body.role-admin #topAdminBtn{display:inline-flex!important}
+@media(max-width:900px){
+  body.role-admin #topAdminBtn{display:none!important}
+  body.role-admin #mobileAdminBtn{display:inline-flex!important}
+}
 </style></head><body><div id="appToast" class="app-toast" role="status" aria-live="polite"></div><div id="cloudLogin" class="cloud-login hidden"><div class="cloud-box">
 <h2>Sezionatori UMTE</h2>
 <p>Accesso riservato agli utenti autorizzati. I dati vengono sincronizzati con l'archivio centrale.</p>
@@ -195,10 +200,10 @@ main{padding:18px;min-width:0}.hidden{display:none!important}.grid{display:grid;
 </div>
 
 <div id="adminPanel" class="admin-overlay hidden"><div class="admin-box"><h2>Amministrazione Censimento Sezionatori</h2><div class="admin-grid"><div><label>Identificativo UM</label><input id="cfgUM"></div><div><label>Descrizione / territorio</label><input id="cfgDesc"></div></div><h3>Nuclei presenti</h3><div class="fileline"><input id="newNucleo" placeholder="Nuovo nucleo"><button class="admin-btn" onclick="addNucleo()">AGGIUNGI NUCLEO</button></div><div id="nucleiList" class="nuclei-list"></div><h3>Importazione anagrafica</h3><div class="admin-note">Importa il file Excel standard. L’app legge esclusivamente il foglio IMPORTAZIONE e ignora MAPPATURA_SEDI e ISTRUZIONI. Le righe con mappatura mancante, Nucleo vuoto o Località/Tratta vuota vengono bloccate prima dell’importazione. Se un ID esiste già viene aggiornata solo l’anagrafica e le verifiche restano conservate.</div><div class="fileline" style="margin-top:10px"><input id="importFile" type="file" accept=".xlsx,.xls,.csv"><button class="admin-btn" onclick="importRegistry()">IMPORTA ELENCO</button><button class="btn secondary" onclick="downloadTemplate()">SCARICA MODELLO CSV BASE</button></div><h3>Gestione sezionatori</h3><div class="fileline"><button class="admin-btn" onclick="newPlantRow()">+ NUOVO SEZIONATORE</button><input id="adminSearch" placeholder="Cerca ID, località, nucleo..." oninput="renderAdminPlants()" style="max-width:360px"></div><div style="overflow:auto;max-height:340px;margin-top:8px"><table class="admin-table"><thead><tr><th>ID / Sede tecnica</th><th>Definizione</th><th>Località / tratta</th><th>Nucleo</th><th>Km I</th><th>Km F</th><th>Stato</th><th>Azioni</th></tr></thead><tbody id="adminPlants"></tbody></table></div>
-<h3>Personale abilitato - Programma per Prove</h3>
-<div class="admin-note">Anagrafica utilizzata per la compilazione automatica del Programma per Prove. Gli operatori possono selezionare solo persone attive con abilitazione PES; la modifica dei dati è riservata all’amministratore.</div>
-<div class="fileline" style="margin-top:10px"><button class="admin-btn" onclick="newPersonRow()">+ NUOVA PERSONA</button><input id="personImportFile" type="file" accept=".xlsx,.xls,.csv"><button class="admin-btn" onclick="importPersonnel()">IMPORTA PERSONALE</button><button class="btn secondary" onclick="downloadPersonnelTemplate()">SCARICA MODELLO CSV</button><input id="personSearch" placeholder="Cerca nome, CID, nucleo..." oninput="renderPersonnel()" style="max-width:300px"></div>
-<div style="overflow:auto;max-height:330px;margin-top:8px"><table class="admin-table"><thead><tr><th>Cognome</th><th>Nome</th><th>CID</th><th>Telefono</th><th>Nucleo</th><th>PES</th><th>Preposto emergenze</th><th>Attivo</th><th>Azioni</th></tr></thead><tbody id="personRows"></tbody></table></div>
+<h3>Personale - Programma per Prove</h3>
+<div class="admin-note">Anagrafica centralizzata utilizzata per compilare automaticamente il Programma per Prove. Puoi gestire cognome, nome, qualifica, CID, telefono, email, nucleo e stato di selezionabilità nel PP. Il flag <b>Selezionabile PP</b> non attribuisce automaticamente la qualifica PES: le abilitazioni devono essere verificate secondo i dati e le procedure vigenti.</div>
+<div class="fileline" style="margin-top:10px"><button class="admin-btn" onclick="newPersonRow()">+ NUOVA PERSONA</button><input id="personImportFile" type="file" accept=".xlsx,.xls,.csv"><button class="admin-btn" onclick="importPersonnel()">IMPORTA PERSONALE</button><button class="btn secondary" onclick="downloadPersonnelTemplate()">SCARICA MODELLO CSV</button><input id="personSearch" placeholder="Cerca nome, CID, qualifica, email, nucleo..." oninput="renderPersonnel()" style="max-width:360px"></div>
+<div style="overflow:auto;max-height:360px;margin-top:8px"><table class="admin-table"><thead><tr><th>Cognome</th><th>Nome</th><th>Qualifica</th><th>CID</th><th>Telefono</th><th>Email</th><th>Nucleo</th><th>Selezionabile PP</th><th>Preposto emergenze</th><th>Attivo</th><th>Azioni</th></tr></thead><tbody id="personRows"></tbody></table></div>
 <h3>Template Programma per Prove</h3>
 <div class="admin-note">Installa il modello PP <b>normalizzato/non protetto</b>. È lo stesso modulo ufficiale, ma reso compatibile con la compilazione automatica. Il file viene salvato nell’<b>archivio centrale protetto</b> e sarà disponibile da tutti i PC autorizzati.</div>
 <div class="fileline" style="margin-top:10px"><input id="ppTemplateFile" type="file" accept="application/pdf,.pdf"><button class="admin-btn" onclick="installPPTemplate()">INSTALLA / AGGIORNA TEMPLATE PP</button><span id="ppTemplateStatus" class="muted">Stato non verificato</span></div>
@@ -278,15 +283,16 @@ main{padding:18px;min-width:0}.hidden{display:none!important}.grid{display:grid;
 <div><label class="muted">Piani di Lavoro di riferimento n°</label><input id="ppPdl" placeholder="eventuale riferimento" style="width:100%;padding:9px;border:1px solid #b9c7d8;border-radius:8px"></div>
 <div><label class="muted">Unità consegnataria</label><input id="ppUnitaConsegnataria" style="width:100%;padding:9px;border:1px solid #b9c7d8;border-radius:8px"></div>
 <div><label class="muted">Unità emittente</label><input id="ppUnitaEmittente" style="width:100%;padding:9px;border:1px solid #b9c7d8;border-radius:8px"></div>
-<div><label class="muted">Compilato da — personale PES</label><select id="ppCompilato" onchange="renderPPSummary()" style="width:100%;padding:9px;border:1px solid #b9c7d8;border-radius:8px"></select></div>
-<div><label class="muted">Verificato da — personale PES</label><select id="ppVerificato" onchange="renderPPSummary()" style="width:100%;padding:9px;border:1px solid #b9c7d8;border-radius:8px"></select></div>
+<div class="full"><label class="muted">Filtro rapido personale</label><div style="display:grid;grid-template-columns:minmax(180px,2fr) minmax(160px,1fr);gap:8px"><input id="ppPersonSearch" type="search" placeholder="Cerca cognome, nome, CID, qualifica..." oninput="renderPPPersonnelSelectors()" style="width:100%;padding:9px;border:1px solid #b9c7d8;border-radius:8px"><select id="ppPersonNucleo" onchange="renderPPPersonnelSelectors()" style="width:100%;padding:9px;border:1px solid #b9c7d8;border-radius:8px"><option value="">Tutti i nuclei</option></select></div></div>
+<div><label class="muted">Compilato da</label><select id="ppCompilato" onchange="renderPPSummary()" style="width:100%;padding:9px;border:1px solid #b9c7d8;border-radius:8px"></select></div>
+<div><label class="muted">Verificato da</label><select id="ppVerificato" onchange="renderPPSummary()" style="width:100%;padding:9px;border:1px solid #b9c7d8;border-radius:8px"></select></div>
 <div><label class="muted">Responsabile delle Prove (RP)</label><select id="ppRP" onchange="renderPPSummary()" style="width:100%;padding:9px;border:1px solid #b9c7d8;border-radius:8px"></select></div>
 <div><label class="muted">Preposto interventi di emergenza</label><select id="ppPreposto" style="width:100%;padding:9px;border:1px solid #b9c7d8;border-radius:8px"></select></div>
 <div><label class="muted">Dalle ore</label><input id="ppFrom" type="datetime-local" style="width:100%;padding:9px;border:1px solid #b9c7d8;border-radius:8px"></div>
 <div><label class="muted">Alle ore</label><input id="ppTo" type="datetime-local" style="width:100%;padding:9px;border:1px solid #b9c7d8;border-radius:8px"></div>
 <div class="full"><label class="muted">Obiettivo della prova</label><textarea id="ppObjective" style="width:100%;min-height:70px;padding:9px;border:1px solid #b9c7d8;border-radius:8px">Verifiche funzionali previste dal ciclo di manutenzione dei sezionatori TE selezionati.</textarea></div>
 <div class="full"><label class="muted">Cerca e seleziona sezionatori</label><input id="ppPlantSearch" type="search" placeholder="Cerca sede tecnica, località, nucleo..." oninput="renderPPPlants()" style="width:100%;padding:9px;border:1px solid #b9c7d8;border-radius:8px;margin-bottom:8px"><div id="ppPlants" class="pp-select-list"></div></div>
-<div class="full"><label class="muted">RI — Responsabile dell'impianto (PES)</label><div class="admin-note" style="margin:5px 0 8px">Per ogni elemento selezionato indica il RI. L'app recupera nome, telefono e unità dal personale PES.</div><div id="ppRIList"></div></div>
+<div class="full"><label class="muted">RI — Responsabile dell'impianto</label><div class="admin-note" style="margin:5px 0 8px">Per ogni elemento selezionato indica il RI. L'app recupera automaticamente i dati anagrafici dal personale. La selezione nel PP non sostituisce la verifica delle abilitazioni richieste.</div><div id="ppRIList"></div></div>
 <div class="full"><label class="muted">Configurazione di prova / assetto alla consegna</label><textarea id="ppConfig" placeholder="Indica l'assetto/configurazione con cui l'elemento viene consegnato al RP per la prova: posizione del sezionatore, eventuali vincoli, alimentazioni/sezionamenti e condizioni necessarie all'esecuzione della prova." style="width:100%;min-height:80px;padding:9px;border:1px solid #b9c7d8;border-radius:8px"></textarea></div>
 <div class="full"><label class="muted">a) Attività lavorative di predisposizione di prova</label><textarea id="ppPrep" placeholder="Descrivi le attività da eseguire prima della prova: predisposizione dell'impianto, controlli preliminari, eventuali esclusioni/sezionamenti e condizioni da realizzare prima dell'inizio delle prove." style="width:100%;min-height:70px;padding:9px;border:1px solid #b9c7d8;border-radius:8px"></textarea></div>
 <div class="full"><label class="muted">b) Prove</label><textarea id="ppTests" placeholder="Descrivi esattamente quali prove funzionali devono essere eseguite sull'elemento: apertura/chiusura, comando, controllo, posizione, segnalazioni e verifiche previste per la specifica tipologia di sezionatore." style="width:100%;min-height:100px;padding:9px;border:1px solid #b9c7d8;border-radius:8px"></textarea></div>
@@ -396,8 +402,8 @@ function exportExcelData(){
   const wb=XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(rows.length?rows:[{"SEDE TECNICA":""}]),"BACKUP_CENSIMENTO");
   const dbChunks=[];for(const [id,obj] of Object.entries(db||{})){const txt=JSON.stringify(obj),size=30000,total=Math.max(1,Math.ceil(txt.length/size));for(let i=0;i<total;i++)dbChunks.push({"SEDE TECNICA":id,"CHUNK":i+1,"TOTALE CHUNK":total,"DATI JSON":txt.slice(i*size,(i+1)*size)});}XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(dbChunks.length?dbChunks:[{"SEDE TECNICA":"","CHUNK":"","TOTALE CHUNK":"","DATI JSON":""}]),"DATI_DB");
-  const pRows=personnel.map(p=>({"ID INTERNO":p.id||"","COGNOME":p.cognome||"","NOME":p.nome||"","CID":p.cid||"","TELEFONO":p.telefono||"","NUCLEO":p.nucleo||"","PES":p.abilitatoPP===false?"NO":"SI","PREPOSTO EMERGENZE":p.preposto?"SI":"NO","ATTIVO":p.attivo===false?"NO":"SI"}));
-  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(pRows.length?pRows:[{"ID INTERNO":"","COGNOME":"","NOME":"","CID":"","TELEFONO":"","NUCLEO":"","PES":"","PREPOSTO EMERGENZE":"","ATTIVO":""}]),"PERSONALE");
+  const pRows=personnel.map(p=>({"ID INTERNO":p.id||"","COGNOME":p.cognome||"","NOME":p.nome||"","QUALIFICA":p.qualifica||"","CID":p.cid||"","TELEFONO":p.telefono||"","EMAIL":p.email||"","NUCLEO":p.nucleo||"","ABILITATO PP":p.abilitatoPP===false?"NO":"SI","PREPOSTO EMERGENZE":p.preposto?"SI":"NO","ATTIVO":p.attivo===false?"NO":"SI"}));
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(pRows.length?pRows:[{"ID INTERNO":"","COGNOME":"","NOME":"","QUALIFICA":"","CID":"","TELEFONO":"","EMAIL":"","NUCLEO":"","ABILITATO PP":"","PREPOSTO EMERGENZE":"","ATTIVO":""}]),"PERSONALE");
   const regRows=ppRegister.map(r=>({"NUMERO PP":r.number||"","GENERATO IL":r.generatedAt||"","PERIODO PROVA":r.period||"","ELEMENTI":Array.isArray(r.plants)?r.plants.join(" | "):"","RP":r.rp||"","CID RP":r.rpCid||"","NOME FILE":r.fileName||"","RIGENERABILE":r.payload?"SI":"NO"}));
   XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(regRows.length?regRows:[{"NUMERO PP":"","GENERATO IL":"","PERIODO PROVA":"","ELEMENTI":"","RP":"","CID RP":"","NOME FILE":"","RIGENERABILE":""}]),"REGISTRO_PP");
   const dataRows=ppRegister.filter(r=>r.payload).map(r=>({"NUMERO PP":r.number||"","PAYLOAD JSON":JSON.stringify(r.payload)}));
@@ -420,7 +426,7 @@ async function restoreExcelBackup(){
   if(!restoredMaster.length){alert("Nel backup non sono presenti sedi tecniche valide.");return;}
   let backupUM="",backupDesc="",backupNuclei=[],backupLastPP=0;const infoSheet=wb.SheetNames.find(n=>norm(n)==="INFO_BACKUP");if(infoSheet){const ir=XLSX.utils.sheet_to_json(wb.Sheets[infoSheet],{header:1,defval:""}),info={};ir.slice(1).forEach(r=>{if(r[0])info[norm(r[0])]=r[1]});backupUM=String(info["IDENTIFICATIVO UM"]||"").trim();backupDesc=String(info["DESCRIZIONE / TERRITORIO"]||"").trim();backupNuclei=String(info["NUCLEI"]||"").split("|").map(x=>x.trim()).filter(Boolean);backupLastPP=Number(info["ULTIMO PROGRESSIVO PP"]||0);}
   if(!backupNuclei.length)backupNuclei=[...new Set(restoredMaster.map(x=>x.nucleo).filter(Boolean))];
-  let restoredPersonnel=[];const persSheet=wb.SheetNames.find(n=>norm(n)==="PERSONALE");if(persSheet){const pr=XLSX.utils.sheet_to_json(wb.Sheets[persSheet],{defval:"",raw:false});restoredPersonnel=pr.filter(r=>String(r["COGNOME"]||r["NOME"]||r["CID"]||"").trim()).map((r,i)=>({id:String(r["ID INTERNO"]||"").trim()||("P"+Date.now()+"_"+i),cognome:String(r["COGNOME"]||"").trim(),nome:String(r["NOME"]||"").trim(),cid:String(r["CID"]||"").trim(),telefono:String(r["TELEFONO"]||"").trim(),nucleo:String(r["NUCLEO"]||"").trim(),abilitatoPP:norm(r["PES"]||r["ABILITATO PP"])!=="NO",preposto:norm(r["PREPOSTO EMERGENZE"])==="SI",attivo:norm(r["ATTIVO"])!=="NO"}));}
+  let restoredPersonnel=[];const persSheet=wb.SheetNames.find(n=>norm(n)==="PERSONALE");if(persSheet){const pr=XLSX.utils.sheet_to_json(wb.Sheets[persSheet],{defval:"",raw:false});restoredPersonnel=pr.filter(r=>String(r["COGNOME"]||r["NOME"]||r["CID"]||"").trim()).map((r,i)=>({id:String(r["ID INTERNO"]||"").trim()||("P"+Date.now()+"_"+i),cognome:String(r["COGNOME"]||"").trim(),nome:String(r["NOME"]||"").trim(),qualifica:String(r["QUALIFICA"]||"").trim(),cid:String(r["CID"]||"").trim(),telefono:String(r["TELEFONO"]||"").trim(),email:String(r["EMAIL"]||"").trim(),nucleo:String(r["NUCLEO"]||"").trim(),abilitatoPP:norm(r["ABILITATO PP"]||r["PES"])!=="NO",preposto:norm(r["PREPOSTO EMERGENZE"])==="SI",attivo:norm(r["ATTIVO"])!=="NO"}));}
   const payloadByNo={};const dataSheet=wb.SheetNames.find(n=>norm(n)==="DATI_PP");if(dataSheet){XLSX.utils.sheet_to_json(wb.Sheets[dataSheet],{defval:"",raw:false}).forEach(r=>{const no=String(r["NUMERO PP"]||"").trim(),txt=String(r["PAYLOAD JSON"]||"");if(no&&txt){try{payloadByNo[no]=JSON.parse(txt);}catch(e){console.warn("Payload PP non leggibile",no,e);}}});}
   let restoredPP=[];const regSheet=wb.SheetNames.find(n=>norm(n)==="REGISTRO_PP");if(regSheet){restoredPP=XLSX.utils.sheet_to_json(wb.Sheets[regSheet],{defval:"",raw:false}).filter(r=>String(r["NUMERO PP"]||"").trim()).map(r=>{const number=String(r["NUMERO PP"]||"").trim();return{number,generatedAt:String(r["GENERATO IL"]||""),period:String(r["PERIODO PROVA"]||""),plants:String(r["ELEMENTI"]||"").split("|").map(x=>x.trim()).filter(Boolean),rp:String(r["RP"]||""),rpCid:String(r["CID RP"]||""),fileName:String(r["NOME FILE"]||""),payload:payloadByNo[number]||null};});}
   if(!backupLastPP&&restoredPP.length)backupLastPP=Math.max(...restoredPP.map(r=>Number(r.number)||0));
@@ -519,9 +525,10 @@ async function loadCurrentUserProfile(){
 }
 function updateRoleUI(){
   const isAdmin=currentUserRole==="admin";
+  document.body?.classList.toggle("role-admin",isAdmin);
   ["mobileAdminBtn","topAdminBtn"].forEach(id=>{
     const el=$(id);
-    if(el)el.style.display=isAdmin?"":"none";
+    if(el)el.setAttribute("aria-hidden",isAdmin?"false":"true");
   });
 }
 async function cloudFirstAccess(){
@@ -1029,15 +1036,15 @@ function downloadTemplate(){let csv='Sede tecnica;Definizione;Località / Tratta
 
 function personRow(p,i){
   const opts=(config.nuclei||[]).map(n=>`<option ${norm(n)===norm(p.nucleo)?"selected":""}>${esc(n)}</option>`).join("");
-  return `<tr data-pi="${i}"><td><input data-pk="cognome" value="${esc(p.cognome||"")}"></td><td><input data-pk="nome" value="${esc(p.nome||"")}"></td><td><input data-pk="cid" value="${esc(p.cid||"")}"></td><td><input data-pk="telefono" value="${esc(p.telefono||"")}"></td><td><select data-pk="nucleo"><option></option>${opts}</select></td><td class="checkcell"><input type="checkbox" data-pk="abilitatoPP" ${p.abilitatoPP===false?"":"checked"}></td><td class="checkcell"><input type="checkbox" data-pk="preposto" ${p.preposto?"checked":""}></td><td class="checkcell"><input type="checkbox" data-pk="attivo" ${p.attivo===false?"":"checked"}></td><td><button class="admin-btn" onclick="savePersonRow(${i})">SALVA</button> <button class="admin-btn danger" onclick="deletePerson(${i})">ELIMINA</button></td></tr>`;
+  return `<tr data-pi="${i}"><td><input data-pk="cognome" value="${esc(p.cognome||"")}"></td><td><input data-pk="nome" value="${esc(p.nome||"")}"></td><td><input data-pk="qualifica" value="${esc(p.qualifica||"")}"></td><td><input data-pk="cid" value="${esc(p.cid||"")}"></td><td><input data-pk="telefono" value="${esc(p.telefono||"")}"></td><td><input data-pk="email" type="email" value="${esc(p.email||"")}"></td><td><select data-pk="nucleo"><option></option>${opts}</select></td><td class="checkcell"><input type="checkbox" data-pk="abilitatoPP" ${p.abilitatoPP===false?"":"checked"}></td><td class="checkcell"><input type="checkbox" data-pk="preposto" ${p.preposto?"checked":""}></td><td class="checkcell"><input type="checkbox" data-pk="attivo" ${p.attivo===false?"":"checked"}></td><td><button class="admin-btn" onclick="savePersonRow(${i})">SALVA</button> <button class="admin-btn danger" onclick="deletePerson(${i})">ELIMINA</button></td></tr>`;
 }
 function renderPersonnel(){
   const body=$("personRows"); if(!body)return;
   const q=norm($("personSearch")?.value||"");
-  const arr=personnel.map((p,i)=>({p,i})).filter(o=>!q||norm([o.p.cognome,o.p.nome,o.p.cid,o.p.telefono,o.p.nucleo].join(" ")).includes(q));
+  const arr=personnel.map((p,i)=>({p,i})).filter(o=>!q||norm([o.p.cognome,o.p.nome,o.p.qualifica,o.p.cid,o.p.telefono,o.p.email,o.p.nucleo].join(" ")).includes(q));
   body.innerHTML=arr.map(o=>personRow(o.p,o.i)).join("");
 }
-function newPersonRow(){personnel.unshift({id:"P"+Date.now(),cognome:"",nome:"",cid:"",telefono:"",nucleo:config.nuclei[0]||"",abilitatoPP:true,preposto:false,attivo:true});renderPersonnel();}
+function newPersonRow(){personnel.unshift({id:"P"+Date.now(),cognome:"",nome:"",qualifica:"",cid:"",telefono:"",email:"",nucleo:config.nuclei[0]||"",abilitatoPP:true,preposto:false,attivo:true});renderPersonnel();}
 async function savePersonRow(i){
   const tr=document.querySelector(`tr[data-pi="${i}"]`); if(!tr)return;
   const p={...personnel[i]}; tr.querySelectorAll("[data-pk]").forEach(el=>p[el.dataset.pk]=el.type==="checkbox"?el.checked:el.value.trim());
@@ -1046,7 +1053,7 @@ async function savePersonRow(i){
   personnel[i]=p; await persistAll(); renderPersonnel(); alert("Anagrafica personale salvata.");
 }
 async function deletePerson(i){const p=personnel[i];if(!confirm(`Eliminare definitivamente ${p.cognome||""} ${p.nome||""}?`))return;personnel.splice(i,1);await persistAll();renderPersonnel();}
-function downloadPersonnelTemplate(){const csv='COGNOME;NOME;CID;TELEFONO;NUCLEO;PES;PREPOSTO EMERGENZE;ATTIVO\nROSSI;MARIO;123456;3331234567;Gallarate;SI;SI;SI\n';const b=new Blob([csv],{type:'text/csv;charset=utf-8'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='Modello_Personale_PES_PP.csv';a.click();URL.revokeObjectURL(a.href);}
+function downloadPersonnelTemplate(){const csv='COGNOME;NOME;QUALIFICA;CID;TELEFONO;EMAIL;NUCLEO;ABILITATO PP;PREPOSTO EMERGENZE;ATTIVO\nROSSI;MARIO;OSMI;123456;3138000000;m.rossi@rfi.it;Gallarate;SI;SI;SI\n';const b=new Blob([csv],{type:'text/csv;charset=utf-8'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='Modello_Personale_PP.csv';a.click();URL.revokeObjectURL(a.href);}
 async function importPersonnel(){
   const f=$("personImportFile")?.files?.[0]; if(!f){alert("Seleziona il file del personale.");return;}
   let rows=[];
@@ -1062,7 +1069,7 @@ async function importPersonnel(){
     const headers=matrix[hi].map(v=>String(v||"").trim());
     rows=matrix.slice(hi+1).filter(row=>row.some(v=>String(v||"").trim())).map(row=>{const o={};headers.forEach((h,i)=>{if(h)o[h]=row[i]??"";});return o;});
   }
-  const imp=rows.filter(r=>String(r.COGNOME||r.NOME||r.CID||"").trim()).map((r,i)=>({id:"P"+Date.now()+"_"+i,cognome:String(r.COGNOME||"").trim(),nome:String(r.NOME||"").trim(),cid:String(r.CID||"").trim(),telefono:String(r.TELEFONO||"").trim(),nucleo:String(r.NUCLEO||"").trim(),abilitatoPP:norm(r["PES"]||r["ABILITATO PP"])!=="NO",preposto:norm(r["PREPOSTO EMERGENZE"])==="SI",attivo:norm(r.ATTIVO)!=="NO"}));
+  const imp=rows.filter(r=>String(r.COGNOME||r.NOME||r.CID||"").trim()).map((r,i)=>({id:"P"+Date.now()+"_"+i,cognome:String(r.COGNOME||"").trim(),nome:String(r.NOME||"").trim(),qualifica:String(r.QUALIFICA||"").trim(),cid:String(r.CID||"").trim(),telefono:String(r.TELEFONO||"").trim(),email:String(r.EMAIL||"").trim(),nucleo:String(r.NUCLEO||"").trim(),abilitatoPP:norm(r["ABILITATO PP"]||r["PES"])!=="NO",preposto:norm(r["PREPOSTO EMERGENZE"])==="SI",attivo:norm(r.ATTIVO)!=="NO"}));
   if(!imp.length){alert("Nessuna persona valida trovata.");return;}
   let add=0,upd=0;for(const p of imp){const j=p.cid?personnel.findIndex(x=>norm(x.cid)===norm(p.cid)):-1;if(j>=0){personnel[j]={...personnel[j],...p,id:personnel[j].id};upd++;}else{personnel.push(p);add++;}if(p.nucleo&&!config.nuclei.some(n=>norm(n)===norm(p.nucleo)))config.nuclei.push(p.nucleo);}
   await persistAll();renderNuclei();renderPersonnel();$("personImportFile").value="";alert(`Importazione personale completata: ${add} nuovi, ${upd} aggiornati.`);
@@ -1120,23 +1127,41 @@ async function checkPPTemplate(){
 let ppSelected=new Set();
 let ppRISelected={};
 function activePPPeople(){return personnel.filter(p=>p.attivo!==false&&p.abilitatoPP!==false).sort((a,b)=>(a.cognome+" "+a.nome).localeCompare(b.cognome+" "+b.nome));}
-function personLabel(p){return `${(p.cognome+" "+p.nome).trim()}${p.cid?" - CID "+p.cid:""}${p.nucleo?" - "+p.nucleo:""}`;}
+function filteredPPPeople(extraIds=[]){
+  const q=norm($("ppPersonSearch")?.value||""), nuc=norm($("ppPersonNucleo")?.value||"");
+  const extra=new Set((extraIds||[]).filter(Boolean));
+  return activePPPeople().filter(p=>extra.has(p.id)||((!nuc||norm(p.nucleo)===nuc)&&(!q||norm([p.cognome,p.nome,p.qualifica,p.cid,p.email,p.nucleo].join(" ")).includes(q))));
+}
+function personLabel(p){return `${(p.cognome+" "+p.nome).trim()}${p.qualifica?" - "+p.qualifica:""}${p.cid?" - CID "+p.cid:""}${p.nucleo?" - "+p.nucleo:""}`;}
+function refreshPPPersonnelFilter(){
+  const el=$("ppPersonNucleo"); if(!el)return; const v=el.value;
+  const nuclei=[...new Set(activePPPeople().map(p=>p.nucleo).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
+  el.innerHTML='<option value="">Tutti i nuclei</option>'+nuclei.map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join("");
+  el.value=nuclei.includes(v)?v:"";
+}
+function renderPPPersonnelSelectors(){
+  refreshPPPersonnelFilter();
+  const ids=[$("ppCompilato")?.value,$("ppVerificato")?.value,$("ppRP")?.value,...Object.values(ppRISelected||{})];
+  const ppl=filteredPPPeople(ids);
+  [["ppCompilato","Seleziona chi compila"],["ppVerificato","Seleziona chi verifica"],["ppRP","Seleziona RP"]].forEach(([id,ph])=>{const el=$(id);if(!el)return;const v=el.value;el.innerHTML=`<option value="">${ph}</option>`+ppl.map(p=>`<option value="${esc(p.id)}">${esc(personLabel(p))}</option>`).join("");el.value=v;});
+  const pres=personnel.filter(p=>p.attivo!==false&&p.preposto),ps=$("ppPreposto");if(ps){const pv=ps.value;ps.innerHTML='<option value="">Seleziona preposto</option>'+pres.map(p=>`<option value="${esc(p.id)}">${esc(personLabel(p))}</option>`).join("");ps.value=pv;}
+  renderPPRIList();renderPPSummary();
+}
 function personInitials(p){const parts=[p?.nome||"",p?.cognome||""].filter(Boolean);return parts.map(x=>String(x).trim().charAt(0).toUpperCase()).join("");}
 function renderPP(){
   $("ppNumber").value=String((ppLastProgressive||0)+1);
   if(!$("ppUnitaEmittente").value)$("ppUnitaEmittente").value=config.umId||"";
   if(!$("ppUnitaConsegnataria").value)$("ppUnitaConsegnataria").value=config.umId||"";
-  const ppl=activePPPeople();
-  [["ppCompilato","Seleziona chi compila"],["ppVerificato","Seleziona chi verifica"],["ppRP","Seleziona RP"]].forEach(([id,ph])=>{const el=$(id),v=el.value;el.innerHTML=`<option value="">${ph}</option>`+ppl.map(p=>`<option value="${esc(p.id)}">${esc(personLabel(p))}</option>`).join("");el.value=v;});
-  const pres=personnel.filter(p=>p.attivo!==false&&p.preposto),ps=$("ppPreposto"),pv=ps.value;ps.innerHTML='<option value="">Seleziona preposto</option>'+pres.map(p=>`<option value="${esc(p.id)}">${esc((p.cognome+" "+p.nome).trim())}</option>`).join("");ps.value=pv;
+  refreshPPPersonnelFilter();
+  renderPPPersonnelSelectors();
   renderPPPlants();renderPPRIList();renderPPSummary();renderPPRegister();
 }
-function renderPPRIList(){const box=$("ppRIList");if(!box)return;const ppl=activePPPeople(),plants=selectedPPPlants();if(!plants.length){box.innerHTML='<div class="muted">Seleziona prima almeno un elemento d’impianto.</div>';return;}box.innerHTML=plants.map((x,i)=>{const cur=ppRISelected[x.id]||"";return `<div style="display:grid;grid-template-columns:minmax(190px,1fr) minmax(260px,2fr);gap:8px;align-items:center;margin:6px 0"><div><b>${String.fromCharCode(65+i)} - ${esc(x.id)}</b><br><span class="muted">${esc(x.localita||x.definition||"")}</span></div><select onchange="ppRISelected['${esc(x.id)}']=this.value;renderPPSummary()" style="width:100%;padding:9px;border:1px solid #b9c7d8;border-radius:8px"><option value="">Seleziona RI PES</option>${ppl.map(p=>`<option value="${esc(p.id)}" ${p.id===cur?"selected":""}>${esc(personLabel(p))}</option>`).join("")}</select></div>`;}).join("");}
+function renderPPRIList(){const box=$("ppRIList");if(!box)return;const ppl=filteredPPPeople(Object.values(ppRISelected||{})),plants=selectedPPPlants();if(!plants.length){box.innerHTML='<div class="muted">Seleziona prima almeno un elemento d’impianto.</div>';return;}box.innerHTML=plants.map((x,i)=>{const cur=ppRISelected[x.id]||"";return `<div style="display:grid;grid-template-columns:minmax(190px,1fr) minmax(260px,2fr);gap:8px;align-items:center;margin:6px 0"><div><b>${String.fromCharCode(65+i)} - ${esc(x.id)}</b><br><span class="muted">${esc(x.localita||x.definition||"")}</span></div><select onchange="ppRISelected['${esc(x.id)}']=this.value;renderPPSummary()" style="width:100%;padding:9px;border:1px solid #b9c7d8;border-radius:8px"><option value="">Seleziona RI PES</option>${ppl.map(p=>`<option value="${esc(p.id)}" ${p.id===cur?"selected":""}>${esc(personLabel(p))}</option>`).join("")}</select></div>`;}).join("");}
 
 function renderPPPlants(){const box=$("ppPlants");if(!box)return;const q=norm($("ppPlantSearch")?.value||"");const arr=MASTER.filter(x=>norm(x.stato)!=="DISATTIVATO").filter(x=>!q||norm([x.id,x.localita,x.nucleo,x.definition].join(" ")).includes(q));box.innerHTML=arr.map(x=>`<label class="pp-select-row"><input type="checkbox" ${ppSelected.has(x.id)?"checked":""} onchange="togglePPPlant('${esc(x.id)}',this.checked)"><span><b>${esc(x.id)}</b><br><span class="muted">${esc(x.definition||"")}</span></span><span>${esc(x.localita||"")}</span><span>${esc(x.nucleo||"")}</span></label>`).join("");}
 function togglePPPlant(id,on){if(on&&ppSelected.size>=4&&!ppSelected.has(id)){alert("Il modello PP prevede 4 elementi A-D per documento. Genera un secondo PP per ulteriori sezionatori.");renderPPPlants();return;}if(on)ppSelected.add(id);else ppSelected.delete(id);renderPPRIList();renderPPSummary();}
 function selectedPPPlants(){return [...ppSelected].map(id=>MASTER.find(x=>x.id===id)).filter(Boolean);}
-function renderPPSummary(){const plants=selectedPPPlants(),rp=personnel.find(p=>p.id===$("ppRP")?.value),co=personnel.find(p=>p.id===$("ppCompilato")?.value),ve=personnel.find(p=>p.id===$("ppVerificato")?.value);const ris=plants.map(x=>{const p=personnel.find(q=>q.id===ppRISelected[x.id]);return `${esc(x.id)}: ${p?esc((p.cognome+" "+p.nome).trim()):"RI da selezionare"}`;}).join(" · ");$("ppSummary").innerHTML=`<b>${plants.length}/4 elementi selezionati</b>${plants.length?" - "+plants.map(x=>esc(x.id)).join(" · "):""}<br>Compilato da: ${co?esc((co.cognome+" "+co.nome).trim())+" (sigla "+esc(personInitials(co))+")":"da selezionare"} · Verificato da: ${ve?esc((ve.cognome+" "+ve.nome).trim()):"da selezionare"}<br>RP: ${rp?esc((rp.cognome+" "+rp.nome).trim())+" - CID "+esc(rp.cid||"-")+" - Tel. "+esc(rp.telefono||"-"):"da selezionare"}${ris?"<br>RI: "+ris:""}`;}
+function renderPPSummary(){const plants=selectedPPPlants(),rp=personnel.find(p=>p.id===$("ppRP")?.value),co=personnel.find(p=>p.id===$("ppCompilato")?.value),ve=personnel.find(p=>p.id===$("ppVerificato")?.value);const ris=plants.map(x=>{const p=personnel.find(q=>q.id===ppRISelected[x.id]);return `${esc(x.id)}: ${p?esc((p.cognome+" "+p.nome).trim()):"RI da selezionare"}`;}).join(" · ");$("ppSummary").innerHTML=`<b>${plants.length}/4 elementi selezionati</b>${plants.length?" - "+plants.map(x=>esc(x.id)).join(" · "):""}<br>Compilato da: ${co?esc((co.cognome+" "+co.nome).trim())+" (sigla "+esc(personInitials(co))+")":"da selezionare"} · Verificato da: ${ve?esc((ve.cognome+" "+ve.nome).trim()):"da selezionare"}<br>RP: ${rp?esc((rp.cognome+" "+rp.nome).trim())+(rp.qualifica?" - "+esc(rp.qualifica):"")+" - CID "+esc(rp.cid||"-")+" - Tel. "+esc(rp.telefono||"-"):"da selezionare"}${ris?"<br>RI: "+ris:""}`;}
 function renderPPRegister(){const body=$("ppRegisterBody");if(!body)return;const arr=[...ppRegister].sort((a,b)=>Number(b.number||0)-Number(a.number||0));body.innerHTML=arr.length?arr.map(r=>`<tr><td><b>${esc(r.number||"")}</b></td><td>${esc(r.generatedAt?new Date(r.generatedAt).toLocaleString("it-IT"):"")}</td><td>${esc(r.period||"")}</td><td style="white-space:normal">${esc((r.plants||[]).join(" · "))}</td><td>${esc(r.rp||"")}</td><td>${r.payload?`<button class="btn secondary" onclick="regeneratePP('${esc(r.number)}')">RIGENERA PDF</button>`:`<span class="muted">Dati completi non disponibili</span>`}</td></tr>`).join(""):'<tr><td colspan="6" class="muted">Nessun PP ancora registrato.</td></tr>';}
 function autofillPPTexts(){
   const plants=selectedPPPlants();if(!plants.length){alert("Seleziona almeno un sezionatore.");return;}
